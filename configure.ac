@@ -250,6 +250,7 @@ AC_CONFIG_FILES([Makefile
                  base/Makefile
                  src/Makefile
                  src_extra/Makefile
+                 unity/Makefile
                  doc_src/common_defs.inc
                  ])
 AC_OUTPUT
