@@ -25,7 +25,8 @@ int string_art_main(int, char**);
 int sweep_edges_main(int, char**);
 }
 
-static std::string run_program(int (*prog)(int,char**),
+static std::string run_program(int (*prog)(int, char **),
+                               const std::string &prog_name,
                                const std::vector<std::string> &args,
                                const std::string &input)
 {
@@ -41,16 +42,20 @@ static std::string run_program(int (*prog)(int,char**),
   close(out_pipe[1]);
   close(in_pipe[0]);
 
-  std::vector<char*> argv;
-  for (const auto &s : args)
-    argv.push_back(const_cast<char*>(s.c_str()));
+  std::vector<std::string> argv_store;
+  argv_store.push_back(prog_name);
+  argv_store.insert(argv_store.end(), args.begin(), args.end());
+
+  std::vector<char *> argv;
+  for (auto &s : argv_store)
+    argv.push_back(const_cast<char *>(s.c_str()));
   argv.push_back(nullptr);
 
   if (!input.empty())
     write(in_pipe[1], input.data(), input.size());
   close(in_pipe[1]);
 
-  prog(static_cast<int>(args.size()), argv.data());
+  prog(static_cast<int>(argv_store.size()), argv.data());
 
   fflush(stdout);
   dup2(old_stdout, STDOUT_FILENO);
@@ -67,27 +72,26 @@ static std::string run_program(int (*prog)(int,char**),
   return oss.str();
 }
 
-extern "C" const char *antiprism_command(const char *cmd_in)
+extern "C" const char *antiprism_command(const char *command_name,
+                                         const char *input_data,
+                                         const char *options)
 {
   static std::string out;
-  std::string cmd = cmd_in ? cmd_in : "";
-  size_t nl = cmd.find('\n');
-  std::string line = cmd.substr(0, nl);
-  std::string input = (nl == std::string::npos) ? std::string() : cmd.substr(nl + 1);
-
-  std::istringstream iss(line);
-  std::vector<std::string> args;
-  std::string tok;
-  while (iss >> tok)
-    args.push_back(tok);
-  if (args.empty()) {
+  std::string prog = command_name ? command_name : "";
+  if (prog.empty()) {
     out.clear();
     return out.c_str();
   }
-  std::string prog = args[0];
-  args.erase(args.begin());
 
-  int (*fn)(int,char**) = nullptr;
+  std::vector<std::string> args;
+  if (options && *options) {
+    std::istringstream iss(options);
+    std::string tok;
+    while (iss >> tok)
+      args.push_back(tok);
+  }
+
+  int (*fn)(int, char **) = nullptr;
   if (prog == "off_align") fn = off_align_main;
   else if (prog == "off_color") fn = off_color_main;
   else if (prog == "off_color_radial") fn = off_color_radial_main;
@@ -110,6 +114,7 @@ extern "C" const char *antiprism_command(const char *cmd_in)
     return out.c_str();
   }
 
-  out = run_program(fn, args, input);
+  std::string input = input_data ? input_data : "";
+  out = run_program(fn, prog, args, input);
   return out.c_str();
 }
