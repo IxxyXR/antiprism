@@ -398,3 +398,8 @@ extern "C" int lat_grid_main(int argc, char **argv)
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return lat_grid_main(argc, argv);
+}

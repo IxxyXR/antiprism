@@ -529,3 +529,8 @@ extern "C" int off_align_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return off_align_main(argc, argv);
+}

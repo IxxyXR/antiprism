@@ -644,3 +644,8 @@ extern "C" int poly_weave_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return poly_weave_main(argc, argv);
+}

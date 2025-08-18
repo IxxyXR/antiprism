@@ -433,3 +433,8 @@ extern "C" int off_trans_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return off_trans_main(argc, argv);
+}

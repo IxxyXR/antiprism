@@ -557,3 +557,8 @@ extern "C" int off_normals_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return off_normals_main(argc, argv);
+}

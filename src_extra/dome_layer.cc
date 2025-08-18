@@ -367,3 +367,8 @@ extern "C" int dome_layer_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return dome_layer_main(argc, argv);
+}

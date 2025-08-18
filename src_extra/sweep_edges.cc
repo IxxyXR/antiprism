@@ -578,3 +578,8 @@ extern "C" int sweep_edges_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return sweep_edges_main(argc, argv);
+}

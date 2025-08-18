@@ -358,3 +358,8 @@ extern "C" int spidron_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return spidron_main(argc, argv);
+}

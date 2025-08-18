@@ -324,3 +324,8 @@ extern "C" int off_report_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return off_report_main(argc, argv);
+}

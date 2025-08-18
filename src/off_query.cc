@@ -495,3 +495,8 @@ extern "C" int off_query_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return off_query_main(argc, argv);
+}

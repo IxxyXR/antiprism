@@ -713,3 +713,8 @@ extern "C" int off_color_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return off_color_main(argc, argv);
+}

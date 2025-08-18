@@ -1546,6 +1546,11 @@ extern "C" int off_util_main(int argc, char *argv[])
   return 0;
 }
 
+int main(int argc, char *argv[])
+{
+  return off_util_main(argc, argv);
+}
+
 //------------------------------------------------------------------
 // Unzipping and unfolding
 

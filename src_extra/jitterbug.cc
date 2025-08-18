@@ -396,3 +396,8 @@ extern "C" int jitterbug_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return jitterbug_main(argc, argv);
+}

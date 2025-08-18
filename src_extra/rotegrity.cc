@@ -850,3 +850,8 @@ extern "C" int rotegrity_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return rotegrity_main(argc, argv);
+}

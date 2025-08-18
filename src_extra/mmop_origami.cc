@@ -389,3 +389,8 @@ extern "C" int mmop_origami_main(int argc, char *argv[])
 
   return 0;
 }
+
+int main(int argc, char *argv[])
+{
+  return mmop_origami_main(argc, argv);
+}
