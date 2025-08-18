@@ -1,5 +1,23 @@
+#if defined(_WIN32)
+#include <io.h>
+#include <fcntl.h>
+#define pipe(fds) _pipe(fds, 4096, _O_BINARY)
+#define dup _dup
+#define dup2 _dup2
+#define close _close
+#define read _read
+#define write _write
+#ifndef STDIN_FILENO
+#define STDIN_FILENO 0
+#endif
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
+#endif
+using ssize_t = int;
+#else
 #include <unistd.h>
 #include <fcntl.h>
+#endif
 #include <sstream>
 #include <vector>
 #include <string>
