@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <sstream>
 #include <vector>
 
 using std::map;
@@ -358,16 +359,48 @@ std::string off_file_write_to_string(const Geometry &geom, int sig_dgts)
 std::string off_file_write_to_string(const std::vector<const Geometry *> &geoms,
                                      int sig_dgts)
 {
-  char *buf = nullptr;
-  size_t size = 0;
-  FILE *mem = open_memstream(&buf, &size);
-  if (!mem)
-    return std::string();
+  std::ostringstream out;
 
-  off_file_write(mem, geoms, sig_dgts);
-  fclose(mem);
+  int vert_cnt = 0, face_cnt = 0, edge_cnt = 0;
+  for (auto geom : geoms) {
+    int num_v_col_elems = geom->colors(VERTS).get_properties().size();
+    vert_cnt += geom->verts().size();
+    edge_cnt += geom->edges().size();
+    face_cnt += geom->faces().size() + num_v_col_elems + edge_cnt;
+  }
 
-  std::string out(buf, size);
-  free(buf);
-  return out;
+  out << "OFF\n" << vert_cnt << ' ' << face_cnt << " 0\n";
+
+  for (auto geom : geoms)
+    for (unsigned int i = 0; i < geom->verts().size(); i++)
+      out << geom->verts(i).to_str(" ", sig_dgts) << '\n';
+
+  int last_offset = 0;
+  vert_cnt = 0;
+  for (auto geom : geoms) {
+    int offset = geom->verts().size() ? vert_cnt : last_offset;
+
+    for (unsigned int i = 0; i < geom->faces().size(); i++) {
+      out << geom->faces(i).size();
+      for (unsigned int j = 0; j < geom->faces(i).size(); j++)
+        out << ' ' << geom->faces(i, j) + offset;
+      out << ' ' << off_col(geom->colors(FACES).get(i)) << '\n';
+    }
+
+    for (unsigned int i = 0; i < geom->edges().size(); i++) {
+      out << "2 " << geom->edges(i, 0) + offset << ' '
+          << geom->edges(i, 1) + offset << ' '
+          << off_col(geom->colors(EDGES).get(i)) << '\n';
+    }
+
+    for (auto mi = geom->colors(VERTS).get_properties().begin();
+         mi != geom->colors(VERTS).get_properties().end(); ++mi)
+      out << "1 " << mi->first + offset << ' ' << off_col(mi->second)
+          << '\n';
+
+    last_offset = vert_cnt;
+    vert_cnt += geom->verts().size();
+  }
+
+  return out.str();
 }
