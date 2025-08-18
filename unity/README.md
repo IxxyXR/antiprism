@@ -4,7 +4,8 @@ This directory provides a Unity native plugin that links against the Antiprism
 library. Individual command-line tools are compiled into the static library
 `libantiprism_unity` and exposed through an `antiprism_command` C interface.
 The plugin executes Antiprism tools directly without spawning external
-processes or copying command-line executables.
+processes or copying command-line executables. OFF data is passed directly via
+the API so no temporary files are required.
 
 ## Building a standalone plug-in
 
@@ -58,8 +59,11 @@ public static class Antiprism
 }
 ```
 
-You can now run any exposed tool directly from C#:
+You can now run any exposed tool directly from C#. If a command expects an OFF
+file, pass `-` as the file name and append the OFF text after a newline in the
+same string:
 
 ```csharp
-string off = Antiprism.Run("off_align -r 90 model.off");
+string offData = "OFF\n0 0 0\n"; // minimal example
+string result = Antiprism.Run($"off_align -\n{offData}");
 ```

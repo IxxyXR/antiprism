@@ -25,38 +25,57 @@ int string_art_main(int, char**);
 int sweep_edges_main(int, char**);
 }
 
-static std::string run_program(int (*prog)(int,char**), const std::vector<std::string> &args)
+static std::string run_program(int (*prog)(int,char**),
+                               const std::vector<std::string> &args,
+                               const std::string &input)
 {
-  int pipefd[2];
-  pipe(pipefd);
+  int out_pipe[2];
+  int in_pipe[2];
+  pipe(out_pipe);
+  pipe(in_pipe);
+
   int old_stdout = dup(STDOUT_FILENO);
-  dup2(pipefd[1], STDOUT_FILENO);
-  close(pipefd[1]);
+  int old_stdin = dup(STDIN_FILENO);
+  dup2(out_pipe[1], STDOUT_FILENO);
+  dup2(in_pipe[0], STDIN_FILENO);
+  close(out_pipe[1]);
+  close(in_pipe[0]);
 
   std::vector<char*> argv;
   for (const auto &s : args)
     argv.push_back(const_cast<char*>(s.c_str()));
   argv.push_back(nullptr);
 
+  if (!input.empty())
+    write(in_pipe[1], input.data(), input.size());
+  close(in_pipe[1]);
+
   prog(static_cast<int>(args.size()), argv.data());
 
   fflush(stdout);
   dup2(old_stdout, STDOUT_FILENO);
+  dup2(old_stdin, STDIN_FILENO);
   close(old_stdout);
+  close(old_stdin);
 
   std::ostringstream oss;
   char buf[4096];
   ssize_t len;
-  while ((len = read(pipefd[0], buf, sizeof(buf))) > 0)
+  while ((len = read(out_pipe[0], buf, sizeof(buf))) > 0)
     oss.write(buf, len);
-  close(pipefd[0]);
+  close(out_pipe[0]);
   return oss.str();
 }
 
-extern "C" const char *antiprism_command(const char *cmd)
+extern "C" const char *antiprism_command(const char *cmd_in)
 {
   static std::string out;
-  std::istringstream iss(cmd ? cmd : "");
+  std::string cmd = cmd_in ? cmd_in : "";
+  size_t nl = cmd.find('\n');
+  std::string line = cmd.substr(0, nl);
+  std::string input = (nl == std::string::npos) ? std::string() : cmd.substr(nl + 1);
+
+  std::istringstream iss(line);
   std::vector<std::string> args;
   std::string tok;
   while (iss >> tok)
@@ -91,6 +110,6 @@ extern "C" const char *antiprism_command(const char *cmd)
     return out.c_str();
   }
 
-  out = run_program(fn, args);
+  out = run_program(fn, args, input);
   return out.c_str();
 }
