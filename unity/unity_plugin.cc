@@ -1,6 +1,10 @@
 #if defined(_WIN32)
 #include <io.h>
 #include <fcntl.h>
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
 #define pipe(fds) _pipe(fds, 4096, _O_BINARY)
 #define dup _dup
 #define dup2 _dup2
@@ -13,7 +17,6 @@
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
-using ssize_t = int;
 #else
 #include <unistd.h>
 #include <fcntl.h>
