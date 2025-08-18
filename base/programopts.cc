@@ -31,6 +31,7 @@
 #endif
 
 #include "programopts.h"
+#include "private_off_file.h"
 #include "utils.h"
 
 #include <cstring>
@@ -241,6 +242,11 @@ void ProgramOpts::write_or_error(const Geometry &geom, const string &name,
   print_status_or_exit(geom.write(name, sig_dgts));
   if (!geom.is_set())
     warning("output geometry has no vertices (empty geometry)");
+}
+
+string ProgramOpts::write_to_string(const Geometry &geom, int sig_dgts)
+{
+  return off_file_write_to_string(geom, sig_dgts);
 }
 
 } // namespace anti

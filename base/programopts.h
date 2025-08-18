@@ -173,6 +173,15 @@ public:
    *  or if negative then the number of digits after the decimal point. */
   void write_or_error(const Geometry &geom, const std::string &name,
                       int sig_dgts = DEF_SIG_DGTS);
+
+  /// Write a geometry to an OFF-format string
+  /** Return the geometry in OFF format as a string.
+   *  \param geom the model geometry
+   *  \param sig_dgts the number of significant digits to write,
+   *   or if negative then the number of digits after the decimal point.
+   *  \return a string containing the OFF representation */
+  std::string write_to_string(const Geometry &geom,
+                              int sig_dgts = DEF_SIG_DGTS);
 };
 
 } // namespace anti

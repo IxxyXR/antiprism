@@ -79,6 +79,16 @@ The Antiview viewer depends on GLUT. A GLUT package suitable for
 developing against must be installed in order to build Antiview,
 otherwise the build and install will not include this program.
 
+If Antiview is not required, run the configure script with
+`--disable-antiview` to skip the viewer and its OpenGL dependencies.
+
+Unity plugin
+------------
+Building the repository also creates a Unity wrapper library at
+`unity/.libs/libantiprism_unity.{dll|so|dylib}`. See `unity/README.md`
+for details on how to copy this DLL into a Unity project and invoke the
+Antiprism tools from C#.
+
 On a Debian-based system you could install Freeglut
 
    sudo apt-get install freeglut3-dev

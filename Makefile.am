@@ -1,7 +1,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = base/tesselator base/qhull base/muparser base src src_extra
+SUBDIRS = base/tesselator base/qhull base/muparser base src src_extra unity
 if BUILD_ANTIVIEW
 SUBDIRS += aview
 endif
