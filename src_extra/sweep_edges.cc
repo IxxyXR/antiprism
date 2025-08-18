@@ -556,7 +556,7 @@ void sw_opts::process_command_line(int argc, char **argv)
     ifile = argv[optind];
 }
 
-int main(int argc, char *argv[])
+extern "C" int sweep_edges_main(int argc, char *argv[])
 {
   sw_opts opts;
   opts.process_command_line(argc, argv);

@@ -335,7 +335,7 @@ double v_ang_at_ax(const Vec3d &v0, const Vec3d &v1, const Vec3d &ax)
   return ang;
 }
 
-int main(int argc, char *argv[])
+extern "C" int spidron_main(int argc, char *argv[])
 {
   spid_opts opts;
   opts.process_command_line(argc, argv);

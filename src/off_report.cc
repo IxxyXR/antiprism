@@ -280,7 +280,7 @@ void print_counts(rep_printer &rep, const char *counts)
   }
 }
 
-int main(int argc, char *argv[])
+extern "C" int off_report_main(int argc, char *argv[])
 {
   or_opts opts;
   opts.process_command_line(argc, argv);

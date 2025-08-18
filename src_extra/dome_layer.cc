@@ -341,7 +341,7 @@ void set_color_values(Geometry &geom)
   clrng.f_apply_cmap();
 }
 
-int main(int argc, char *argv[])
+extern "C" int dome_layer_main(int argc, char *argv[])
 {
   dome_opts opts;
   opts.process_command_line(argc, argv);

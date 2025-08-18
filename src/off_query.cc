@@ -445,7 +445,7 @@ void face_query(FILE *ofile, rep_printer &rep, oq_opts &opts)
   }
 }
 
-int main(int argc, char *argv[])
+extern "C" int off_query_main(int argc, char *argv[])
 {
   oq_opts opts;
   opts.process_command_line(argc, argv);

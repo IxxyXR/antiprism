@@ -491,7 +491,7 @@ bool warn_if_not_subgroup(const ProgramOpts &opts, char opt,
   return true; // is subgroup
 }
 
-int main(int argc, char *argv[])
+extern "C" int off_color_main(int argc, char *argv[])
 {
   o_col_opts opts;
   opts.process_command_line(argc, argv);

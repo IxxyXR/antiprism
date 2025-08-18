@@ -543,7 +543,7 @@ Vec3d line_nearest_point(Vec3d P, Vec3d A, Vec3d B)
 }
 */
 
-int main(int argc, char *argv[])
+extern "C" int off_normals_main(int argc, char *argv[])
 {
   off_normals_opts opts;
   opts.process_command_line(argc, argv);

@@ -909,7 +909,7 @@ void radial_coloring(Geometry &geom, const Geometry &axes, radial_opts &opts)
   set_indexes_to_color(geom, opts);
 }
 
-int main(int argc, char *argv[])
+extern "C" int off_color_radial_main(int argc, char *argv[])
 {
   radial_opts opts;
   opts.process_command_line(argc, argv);

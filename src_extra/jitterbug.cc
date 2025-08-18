@@ -381,7 +381,7 @@ void lattice_trans(Geometry &lat_jb, double cyc_val, bool tri_fix, bool tri_top)
   lat_jb.transform(trans);
 }
 
-int main(int argc, char *argv[])
+extern "C" int jitterbug_main(int argc, char *argv[])
 {
   jb_opts opts;
   opts.process_command_line(argc, argv);

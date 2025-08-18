@@ -371,7 +371,7 @@ void lg_opts::process_command_line(int argc, char **argv)
   }
 }
 
-int main(int argc, char **argv)
+extern "C" int lat_grid_main(int argc, char **argv)
 {
   lg_opts opts;
   opts.process_command_line(argc, argv);
