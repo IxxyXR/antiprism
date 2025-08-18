@@ -26,6 +26,10 @@
    \brief Write OFF files
 */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include "private_off_file.h"
 #include "utils.h"
 
@@ -35,6 +39,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <vector>
 
 using std::map;
@@ -341,4 +346,28 @@ void off_file_write(FILE *ofile, const Geometry &geom, int sig_dgts)
   vector<const Geometry *> vg;
   vg.push_back(&geom);
   off_file_write(ofile, vg, sig_dgts);
+}
+
+std::string off_file_write_to_string(const Geometry &geom, int sig_dgts)
+{
+  std::vector<const Geometry *> vg;
+  vg.push_back(&geom);
+  return off_file_write_to_string(vg, sig_dgts);
+}
+
+std::string off_file_write_to_string(const std::vector<const Geometry *> &geoms,
+                                     int sig_dgts)
+{
+  char *buf = nullptr;
+  size_t size = 0;
+  FILE *mem = open_memstream(&buf, &size);
+  if (!mem)
+    return std::string();
+
+  off_file_write(mem, geoms, sig_dgts);
+  fclose(mem);
+
+  std::string out(buf, size);
+  free(buf);
+  return out;
 }

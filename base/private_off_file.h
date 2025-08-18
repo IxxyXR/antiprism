@@ -67,4 +67,11 @@ void off_file_write(FILE *ofile,
                     const std::vector<const anti::Geometry *> &geoms,
                     int sig_dgts = DEF_SIG_DGTS);
 
+// Write geometry to an OFF-format string
+std::string off_file_write_to_string(const anti::Geometry &geom,
+                                     int sig_dgts = DEF_SIG_DGTS);
+std::string off_file_write_to_string(
+    const std::vector<const anti::Geometry *> &geoms,
+    int sig_dgts = DEF_SIG_DGTS);
+
 #endif // PRIVATE_OFF_FILE_H
