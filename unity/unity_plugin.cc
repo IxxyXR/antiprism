@@ -27,7 +27,6 @@ typedef SSIZE_T ssize_t;
 #include <string>
 #include <cstring>
 
-extern "C" {
 int off_align_main(int, char**);
 int off_color_main(int, char**);
 int off_color_radial_main(int, char**);
@@ -45,7 +44,6 @@ int rotegrity_main(int, char**);
 int spidron_main(int, char**);
 int string_art_main(int, char**);
 int sweep_edges_main(int, char**);
-}
 
 static std::string run_program(int (*prog)(int, char **),
                                const std::string &prog_name,
