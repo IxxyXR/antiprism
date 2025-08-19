@@ -543,7 +543,7 @@ Vec3d line_nearest_point(Vec3d P, Vec3d A, Vec3d B)
 }
 */
 
-extern "C" int off_normals_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   off_normals_opts opts;
   opts.process_command_line(argc, argv);
@@ -556,9 +556,4 @@ extern "C" int off_normals_main(int argc, char *argv[])
   opts.write_or_error(geom, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return off_normals_main(argc, argv);
 }

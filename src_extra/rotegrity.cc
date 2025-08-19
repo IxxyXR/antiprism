@@ -793,7 +793,7 @@ void to_output_type(Geometry &geom, int out_type, double strut_len)
   geom.clear(FACES);
 }
 
-extern "C" int rotegrity_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   rot_opts opts;
   opts.process_command_line(argc, argv);
@@ -849,9 +849,4 @@ extern "C" int rotegrity_main(int argc, char *argv[])
   opts.write_or_error(o_geom, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return rotegrity_main(argc, argv);
 }

@@ -491,7 +491,7 @@ bool warn_if_not_subgroup(const ProgramOpts &opts, char opt,
   return true; // is subgroup
 }
 
-extern "C" int off_color_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   o_col_opts opts;
   opts.process_command_line(argc, argv);
@@ -712,9 +712,4 @@ extern "C" int off_color_main(int argc, char *argv[])
   opts.write_or_error(geom, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return off_color_main(argc, argv);
 }

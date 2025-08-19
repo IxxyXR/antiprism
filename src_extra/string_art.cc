@@ -321,7 +321,7 @@ void string_opts::process_command_line(int argc, char **argv)
     error("too many arguments");
 }
 
-extern "C" int string_art_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   string_opts opts;
   opts.process_command_line(argc, argv);
@@ -331,9 +331,4 @@ extern "C" int string_art_main(int argc, char *argv[])
   opts.write_or_error(opts.figure, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return string_art_main(argc, argv);
 }

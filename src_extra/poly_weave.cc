@@ -616,7 +616,7 @@ void wv_opts::process_command_line(int argc, char **argv)
     ifile = argv[optind];
 }
 
-extern "C" int poly_weave_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   wv_opts opts;
   opts.process_command_line(argc, argv);
@@ -643,9 +643,4 @@ extern "C" int poly_weave_main(int argc, char *argv[])
   opts.write_or_error(wv_geom, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return poly_weave_main(argc, argv);
 }

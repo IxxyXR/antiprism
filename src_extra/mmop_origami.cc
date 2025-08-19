@@ -346,7 +346,7 @@ void truncate_faces(Geometry &orig, double trunc_len)
   orig.del(VERTS, orig.get_info().get_free_verts()); // delete F vertices
 }
 
-extern "C" int mmop_origami_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   mmop_opts opts;
   opts.process_command_line(argc, argv);
@@ -388,9 +388,4 @@ extern "C" int mmop_origami_main(int argc, char *argv[])
   opts.write_or_error(origami, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return mmop_origami_main(argc, argv);
 }

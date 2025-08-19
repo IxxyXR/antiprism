@@ -556,7 +556,7 @@ void sw_opts::process_command_line(int argc, char **argv)
     ifile = argv[optind];
 }
 
-extern "C" int sweep_edges_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   sw_opts opts;
   opts.process_command_line(argc, argv);
@@ -577,9 +577,4 @@ extern "C" int sweep_edges_main(int argc, char *argv[])
   opts.write_or_error(geom, opts.ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return sweep_edges_main(argc, argv);
 }

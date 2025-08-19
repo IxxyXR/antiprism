@@ -280,7 +280,7 @@ void print_counts(rep_printer &rep, const char *counts)
   }
 }
 
-extern "C" int off_report_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   or_opts opts;
   opts.process_command_line(argc, argv);
@@ -323,9 +323,4 @@ extern "C" int off_report_main(int argc, char *argv[])
     fclose(ofile);
 
   return 0;
-}
-
-int main(int argc, char *argv[])
-{
-  return off_report_main(argc, argv);
 }
