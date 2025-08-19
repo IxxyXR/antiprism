@@ -7,6 +7,7 @@ set(SRC_EXTRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../src_extra)
 add_library(antiprism_unity STATIC
     ${SRC_DIR}/off_align.cc
     ${SRC_DIR}/off_color.cc
+    ${SRC_DIR}/color_common.cc
     ${SRC_DIR}/off_color_radial.cc
     ${SRC_DIR}/off_normals.cc
     ${SRC_DIR}/off_query.cc
