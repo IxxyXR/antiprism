@@ -11,6 +11,7 @@ add_library(antiprism_unity STATIC
     ${SRC_DIR}/off_normals.cc
     ${SRC_DIR}/off_query.cc
     ${SRC_DIR}/off_report.cc
+    ${SRC_DIR}/rep_print.cc
     ${SRC_DIR}/off_trans.cc
     ${SRC_DIR}/off_util.cc
     ${SRC_EXTRA_DIR}/dome_layer.cc
