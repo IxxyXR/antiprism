@@ -1,9 +1,10 @@
 #if defined(_WIN32)
 #include <io.h>
 #include <fcntl.h>
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_SSIZE_T_DEFINED)
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
+#define _SSIZE_T_DEFINED
 #endif
 #define pipe(fds) _pipe(fds, 4096, _O_BINARY)
 #define dup _dup
