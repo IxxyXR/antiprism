@@ -163,6 +163,12 @@ if(BUILD_UNITY_PLUGIN)
     target_compile_definitions(antiprism PUBLIC ANTIPRISM_BUILD_DLL)
 endif()
 
+# MSVC-specific definitions
+if(MSVC)
+    target_compile_definitions(antiprism PUBLIC _USE_MATH_DEFINES)
+    target_compile_definitions(antiprism PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
 # Platform-specific libraries
 if(UNIX AND NOT APPLE AND NOT ANDROID)
     target_link_libraries(antiprism PRIVATE m)  # Math library
