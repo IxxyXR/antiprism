@@ -605,6 +605,66 @@ ANTIPRISM_API AntiStatus anti_conway_notation(AntiGeometryHandle geom,
 }
 
 /*---------------------------------------------------------------------------
+ * Zonohedra Generators
+ *---------------------------------------------------------------------------*/
+
+ANTIPRISM_API AntiStatus anti_make_zonohedron(AntiGeometryHandle geom,
+                                               const double* star_vectors,
+                                               int num_vectors) {
+  if (!geom || !star_vectors || num_vectors < 1)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Convert flat array to vector of Vec3d
+    std::vector<Vec3d> star;
+    star.reserve(num_vectors);
+    for (int i = 0; i < num_vectors; i++) {
+      star.push_back(Vec3d(
+        star_vectors[i * 3 + 0],
+        star_vectors[i * 3 + 1],
+        star_vectors[i * 3 + 2]
+      ));
+    }
+
+    // Generate zonohedron
+    Status stat = make_zonohedron(*to_geom(geom), star);
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_polar_zonohedron(AntiGeometryHandle geom,
+                                                     const double* star_vectors,
+                                                     int num_vectors,
+                                                     int step,
+                                                     int spiral_step) {
+  if (!geom || !star_vectors || num_vectors < 1)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Convert flat array to vector of Vec3d
+    std::vector<Vec3d> star;
+    star.reserve(num_vectors);
+    for (int i = 0; i < num_vectors; i++) {
+      star.push_back(Vec3d(
+        star_vectors[i * 3 + 0],
+        star_vectors[i * 3 + 1],
+        star_vectors[i * 3 + 2]
+      ));
+    }
+
+    // Generate polar zonohedron
+    Status stat = make_polar_zonohedron(*to_geom(geom), star, step, spiral_step);
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 

@@ -155,6 +155,13 @@ namespace Antiprism
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_conway_notation(IntPtr geom, string notation);
 
+        // Zonohedra Generators
+        [DllImport(LIBRARY_NAME)]
+        private static extern Status anti_make_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors);
+
+        [DllImport(LIBRARY_NAME)]
+        private static extern Status anti_make_polar_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors, int step, int spiral_step);
+
         // Geometry Information
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_geometry_centroid(IntPtr geom, out double x, out double y, out double z);
@@ -245,6 +252,65 @@ namespace Antiprism
         {
             if (disposed)
                 throw new ObjectDisposedException("Geometry");
+        }
+
+        /// <summary>
+        /// Create a zonohedron from a star of vectors.
+        /// A zonohedron is formed by the Minkowski sum of line segments.
+        /// </summary>
+        /// <param name="starVectors">Array of direction vectors</param>
+        /// <returns>New geometry containing the zonohedron</returns>
+        public static Geometry CreateZonohedron(Vector3[] starVectors)
+        {
+            if (starVectors == null || starVectors.Length == 0)
+                throw new ArgumentException("Star vectors cannot be null or empty");
+
+            Geometry geom = new Geometry();
+
+            // Flatten vectors to double array
+            double[] flatVectors = new double[starVectors.Length * 3];
+            for (int i = 0; i < starVectors.Length; i++)
+            {
+                flatVectors[i * 3 + 0] = starVectors[i].x;
+                flatVectors[i * 3 + 1] = starVectors[i].y;
+                flatVectors[i * 3 + 2] = starVectors[i].z;
+            }
+
+            Status status = anti_make_zonohedron(geom.handle, flatVectors, starVectors.Length);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create zonohedron: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create a polar zonohedron from an ordered star of vectors.
+        /// </summary>
+        /// <param name="starVectors">Array of ordered direction vectors</param>
+        /// <param name="step">Step this many places to get to next vector (default: 1)</param>
+        /// <param name="spiralStep">Step between ridges of spirallohedron, 0 for regular (default: 0)</param>
+        /// <returns>New geometry containing the polar zonohedron</returns>
+        public static Geometry CreatePolarZonohedron(Vector3[] starVectors, int step = 1, int spiralStep = 0)
+        {
+            if (starVectors == null || starVectors.Length == 0)
+                throw new ArgumentException("Star vectors cannot be null or empty");
+
+            Geometry geom = new Geometry();
+
+            // Flatten vectors to double array
+            double[] flatVectors = new double[starVectors.Length * 3];
+            for (int i = 0; i < starVectors.Length; i++)
+            {
+                flatVectors[i * 3 + 0] = starVectors[i].x;
+                flatVectors[i * 3 + 1] = starVectors[i].y;
+                flatVectors[i * 3 + 2] = starVectors[i].z;
+            }
+
+            Status status = anti_make_polar_zonohedron(geom.handle, flatVectors, starVectors.Length, step, spiralStep);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create polar zonohedron: {status}");
+
+            return geom;
         }
 
         /// <summary>

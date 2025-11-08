@@ -312,6 +312,33 @@ ANTIPRISM_API AntiStatus anti_conway_notation(AntiGeometryHandle geom,
                                                const char* notation);
 
 /*---------------------------------------------------------------------------
+ * Zonohedra Generators
+ *---------------------------------------------------------------------------*/
+
+/** Generate a zonohedron from a star of vectors
+ * A zonohedron is formed by the Minkowski sum of line segments
+ * @param geom Handle to geometry object
+ * @param star_vectors Array of vectors (x,y,z coordinates flattened)
+ * @param num_vectors Number of vectors in the star
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_zonohedron(AntiGeometryHandle geom,
+                                               const double* star_vectors,
+                                               int num_vectors);
+
+/** Generate a polar zonohedron from an ordered star
+ * @param geom Handle to geometry object
+ * @param star_vectors Array of ordered vectors (x,y,z coordinates flattened)
+ * @param num_vectors Number of vectors in the star
+ * @param step Step this many places to get to next vector (default: 1)
+ * @param spiral_step Step between ridges of spirallohedron, 0 for regular (default: 0)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_polar_zonohedron(AntiGeometryHandle geom,
+                                                     const double* star_vectors,
+                                                     int num_vectors,
+                                                     int step,
+                                                     int spiral_step);
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 
