@@ -543,8 +543,8 @@ namespace Antiprism
         /// <summary>
         /// Create the dual polyhedron (vertices become faces, faces become vertices)
         /// </summary>
-        /// <param name="recipRadius">Reciprocation radius (0 for automatic)</param>
-        public Status Dual(double recipRadius = 0.0)
+        /// <param name="recipRadius">Reciprocation radius (1.0 for standard dual, 0 collapses all vertices to center)</param>
+        public Status Dual(double recipRadius = 1.0)
         {
             CheckDisposed();
             return anti_geometry_dual(handle, recipRadius);

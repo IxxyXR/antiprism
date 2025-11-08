@@ -278,7 +278,9 @@ public class PolyhedronExample : MonoBehaviour
         {
             case ModifierType.Dual:
                 // Create dual polyhedron (vertices become faces, faces become vertices)
+                Debug.Log($"Before Dual: {geom.VertexCount} vertices, {geom.FaceCount} faces");
                 Status dualStatus = geom.Dual();
+                Debug.Log($"After Dual: {geom.VertexCount} vertices, {geom.FaceCount} faces, Status: {dualStatus}");
                 if (dualStatus != Status.OK)
                     Debug.LogWarning($"Dual operation failed: {dualStatus}");
                 break;
