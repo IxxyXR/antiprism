@@ -111,4 +111,7 @@ python/antiprism_wrap.cc
 /python/distutils/dist
 /python/distutils/lib_src
 
+# CMake build directory
+build/
+
 
