@@ -165,6 +165,19 @@ namespace Antiprism
         [DllImport(LIBRARY_NAME)]
         private static extern int anti_geometry_is_oriented(IntPtr geom);
 
+        // Normals
+        [DllImport(LIBRARY_NAME)]
+        private static extern int anti_geometry_get_face_normals(IntPtr geom, double[] normals, int max_faces);
+
+        [DllImport(LIBRARY_NAME)]
+        private static extern Status anti_geometry_get_face_normal(IntPtr geom, int f_idx, out double nx, out double ny, out double nz);
+
+        [DllImport(LIBRARY_NAME)]
+        private static extern int anti_geometry_get_vertex_normals(IntPtr geom, double[] normals, int max_verts);
+
+        [DllImport(LIBRARY_NAME)]
+        private static extern Status anti_geometry_get_vertex_normal(IntPtr geom, int v_idx, out double nx, out double ny, out double nz);
+
         /*-----------------------------------------------------------------------
          * High-Level C# API
          *-----------------------------------------------------------------------*/
@@ -419,6 +432,58 @@ namespace Antiprism
             return anti_geometry_orient(handle);
         }
 
+        /// <summary>
+        /// Get all vertex normals (averaged from surrounding face normals)
+        /// </summary>
+        public Vector3[] GetVertexNormals()
+        {
+            CheckDisposed();
+            int count = VertexCount;
+            if (count == 0)
+                return new Vector3[0];
+
+            double[] normals = new double[count * 3];
+            int actual = anti_geometry_get_vertex_normals(handle, normals, count);
+
+            Vector3[] vnormals = new Vector3[actual];
+            for (int i = 0; i < actual; i++)
+            {
+                vnormals[i] = new Vector3(
+                    (float)normals[i * 3 + 0],
+                    (float)normals[i * 3 + 1],
+                    (float)normals[i * 3 + 2]
+                );
+            }
+
+            return vnormals;
+        }
+
+        /// <summary>
+        /// Get all face normals
+        /// </summary>
+        public Vector3[] GetFaceNormals()
+        {
+            CheckDisposed();
+            int count = FaceCount;
+            if (count == 0)
+                return new Vector3[0];
+
+            double[] normals = new double[count * 3];
+            int actual = anti_geometry_get_face_normals(handle, normals, count);
+
+            Vector3[] fnormals = new Vector3[actual];
+            for (int i = 0; i < actual; i++)
+            {
+                fnormals[i] = new Vector3(
+                    (float)normals[i * 3 + 0],
+                    (float)normals[i * 3 + 1],
+                    (float)normals[i * 3 + 2]
+                );
+            }
+
+            return fnormals;
+        }
+
         // P/Invoke imports
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern IntPtr anti_geometry_create();
@@ -467,5 +532,11 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_orient(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern int anti_geometry_get_vertex_normals(IntPtr geom, double[] normals, int max_verts);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern int anti_geometry_get_face_normals(IntPtr geom, double[] normals, int max_faces);
     }
 }

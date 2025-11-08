@@ -651,3 +651,108 @@ ANTIPRISM_API int anti_geometry_is_oriented(AntiGeometryHandle geom) {
     return -1;
   }
 }
+
+ANTIPRISM_API int anti_geometry_get_face_normals(AntiGeometryHandle geom,
+                                                  double* normals,
+                                                  int max_faces) {
+  if (!geom || !normals)
+    return -1;
+
+  try {
+    Geometry* g = to_geom(geom);
+    std::vector<Vec3d> norms;
+    g->face_norms(norms);
+
+    int num_faces = (int)norms.size();
+    if (num_faces > max_faces)
+      num_faces = max_faces;
+
+    for (int i = 0; i < num_faces; i++) {
+      normals[i * 3 + 0] = norms[i][0];
+      normals[i * 3 + 1] = norms[i][1];
+      normals[i * 3 + 2] = norms[i][2];
+    }
+
+    return num_faces;
+  }
+  catch (...) {
+    return -1;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_get_face_normal(AntiGeometryHandle geom,
+                                                        int f_idx,
+                                                        double* nx, double* ny, double* nz) {
+  if (!geom || !nx || !ny || !nz)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry* g = to_geom(geom);
+    if (f_idx < 0 || f_idx >= (int)g->faces().size())
+      return ANTI_ERROR_INVALID_INDEX;
+
+    Vec3d norm = g->face_norm(f_idx).unit();
+    *nx = norm[0];
+    *ny = norm[1];
+    *nz = norm[2];
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API int anti_geometry_get_vertex_normals(AntiGeometryHandle geom,
+                                                    double* normals,
+                                                    int max_verts) {
+  if (!geom || !normals)
+    return -1;
+
+  try {
+    Geometry* g = to_geom(geom);
+    GeometryInfo info(*g);
+    const std::vector<Vec3d>& v_norms = info.get_vert_norms(true);
+
+    int num_verts = (int)v_norms.size();
+    if (num_verts > max_verts)
+      num_verts = max_verts;
+
+    for (int i = 0; i < num_verts; i++) {
+      normals[i * 3 + 0] = v_norms[i][0];
+      normals[i * 3 + 1] = v_norms[i][1];
+      normals[i * 3 + 2] = v_norms[i][2];
+    }
+
+    return num_verts;
+  }
+  catch (...) {
+    return -1;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_get_vertex_normal(AntiGeometryHandle geom,
+                                                          int v_idx,
+                                                          double* nx, double* ny, double* nz) {
+  if (!geom || !nx || !ny || !nz)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry* g = to_geom(geom);
+    if (v_idx < 0 || v_idx >= (int)g->verts().size())
+      return ANTI_ERROR_INVALID_INDEX;
+
+    GeometryInfo info(*g);
+    const std::vector<Vec3d>& v_norms = info.get_vert_norms(true);
+
+    if (v_idx >= (int)v_norms.size())
+      return ANTI_ERROR_INVALID_INDEX;
+
+    *nx = v_norms[v_idx][0];
+    *ny = v_norms[v_idx][1];
+    *nz = v_norms[v_idx][2];
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}

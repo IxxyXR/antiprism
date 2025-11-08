@@ -336,6 +336,46 @@ ANTIPRISM_API AntiStatus anti_geometry_volume(AntiGeometryHandle geom,
  * @return 1 if oriented, 0 if not, -1 on error */
 ANTIPRISM_API int anti_geometry_is_oriented(AntiGeometryHandle geom);
 
+/** Get all face normals
+ * @param geom Handle to geometry object
+ * @param normals Output array (size must be >= 3 * num_faces)
+ * @param max_faces Maximum faces to process
+ * @return Number of faces processed, or -1 on error */
+ANTIPRISM_API int anti_geometry_get_face_normals(AntiGeometryHandle geom,
+                                                  double* normals,
+                                                  int max_faces);
+
+/** Get normal for a single face
+ * @param geom Handle to geometry object
+ * @param f_idx Face index
+ * @param nx Output for x component of normal
+ * @param ny Output for y component of normal
+ * @param nz Output for z component of normal
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_get_face_normal(AntiGeometryHandle geom,
+                                                        int f_idx,
+                                                        double* nx, double* ny, double* nz);
+
+/** Get all vertex normals (averaged from surrounding face normals)
+ * @param geom Handle to geometry object
+ * @param normals Output array (size must be >= 3 * num_verts)
+ * @param max_verts Maximum vertices to process
+ * @return Number of vertices processed, or -1 on error */
+ANTIPRISM_API int anti_geometry_get_vertex_normals(AntiGeometryHandle geom,
+                                                    double* normals,
+                                                    int max_verts);
+
+/** Get normal for a single vertex
+ * @param geom Handle to geometry object
+ * @param v_idx Vertex index
+ * @param nx Output for x component of normal
+ * @param ny Output for y component of normal
+ * @param nz Output for z component of normal
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_get_vertex_normal(AntiGeometryHandle geom,
+                                                          int v_idx,
+                                                          double* nx, double* ny, double* nz);
+
 #ifdef __cplusplus
 }
 #endif
