@@ -425,7 +425,7 @@ ANTIPRISM_API AntiStatus anti_geometry_scale_xyz(AntiGeometryHandle geom,
     return ANTI_ERROR_INVALID_HANDLE;
 
   try {
-    Trans3d trans = Trans3d::scale(Vec3d(sx, sy, sz));
+    Trans3d trans = Trans3d::scale(sx, sy, sz);
     to_geom(geom)->transform(trans);
     return ANTI_OK;
   }
