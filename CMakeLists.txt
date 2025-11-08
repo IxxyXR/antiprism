@@ -170,6 +170,16 @@ if(MSVC)
     target_compile_definitions(antiprism PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
+# Platform-specific timer definitions
+if(WIN32)
+    # Windows uses timeGetTime and Sleep
+    target_compile_definitions(antiprism PRIVATE UTIMER=2 USLEEP=2)
+    target_link_libraries(antiprism PRIVATE winmm)  # For timeGetTime
+else()
+    # Unix uses gettimeofday and usleep
+    target_compile_definitions(antiprism PRIVATE UTIMER=1 USLEEP=1)
+endif()
+
 # Platform-specific libraries
 if(UNIX AND NOT APPLE AND NOT ANDROID)
     target_link_libraries(antiprism PRIVATE m)  # Math library
