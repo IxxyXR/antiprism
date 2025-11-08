@@ -13,6 +13,9 @@
 
 using UnityEngine;
 using Antiprism;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -105,7 +108,8 @@ public class PolyhedronExample : MonoBehaviour
 
     void OnValidate()
     {
-        // Regenerate when values change in the inspector (Edit mode only)
+        // Regenerate when values change in the inspector
+        // This works in both Edit mode and Play mode!
         if (meshFilter == null)
             meshFilter = GetComponent<MeshFilter>();
 
@@ -118,7 +122,16 @@ public class PolyhedronExample : MonoBehaviour
         if (meshFilter != null)
         {
             meshFilter.mesh = mesh;
+
+            // Use delayed call to avoid issues during deserialization
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.delayCall += () => {
+                if (this != null && mesh != null)
+                    GeneratePolyhedron();
+            };
+            #else
             GeneratePolyhedron();
+            #endif
         }
     }
 
@@ -132,19 +145,19 @@ public class PolyhedronExample : MonoBehaviour
             case PolyhedronType.Tetrahedron: return "tet";
             case PolyhedronType.Cube: return "cube";
             case PolyhedronType.Octahedron: return "oct";
-            case PolyhedronType.Dodecahedron: return "dodec";
+            case PolyhedronType.Dodecahedron: return "dodecahedron";
             case PolyhedronType.Icosahedron: return "ico";
             case PolyhedronType.TruncatedTetrahedron: return "tr_tet";
             case PolyhedronType.TruncatedCube: return "tr_cube";
             case PolyhedronType.TruncatedOctahedron: return "tr_oct";
-            case PolyhedronType.TruncatedDodecahedron: return "tr_dodec";
+            case PolyhedronType.TruncatedDodecahedron: return "tr_dod";
             case PolyhedronType.TruncatedIcosahedron: return "tr_ico";
             case PolyhedronType.Cuboctahedron: return "cubo";
             case PolyhedronType.Icosidodecahedron: return "id";
-            case PolyhedronType.RhombicDodecahedron: return "rhomb_dodec";
-            case PolyhedronType.RhombicTriacontahedron: return "rhomb_triac";
+            case PolyhedronType.RhombicDodecahedron: return "rhombic_dodecahedron";
+            case PolyhedronType.RhombicTriacontahedron: return "rhombic_triacontahedron";
             case PolyhedronType.SnubCube: return "sn_cube";
-            case PolyhedronType.SnubDodecahedron: return "sn_dodec";
+            case PolyhedronType.SnubDodecahedron: return "sn_dod";
             case PolyhedronType.Prism3: return "pri3";
             case PolyhedronType.Prism4: return "pri4";
             case PolyhedronType.Prism5: return "pri5";
