@@ -32,12 +32,28 @@
 #include "../config.h"
 #endif
 
+// Include platform-specific headers BEFORE entering the namespace
+#if UTIMER == 1 // gettimeofday
+#include <sys/time.h>
+#include <unistd.h>
+#elif UTIMER == 2 // timeGetTimer
+#include <mmsystem.h>
+#include <windef.h>
+#endif
+
+#if USLEEP == 1 // usleep
+// Already included above if UTIMER == 1
+#ifndef _UNISTD_H
+#include <unistd.h>
+#endif
+#elif USLEEP == 2 // Sleep
+#include <windows.h>
+#endif
+
 namespace anti {
 
 #if UTIMER == 1 // gettimeofday
 
-#include <sys/time.h>
-#include <unistd.h>
 int Timer::get_time(struct time_val *tp)
 {
   timeval tv;
@@ -51,9 +67,6 @@ int Timer::get_time(struct time_val *tp)
 
 #elif UTIMER == 2 // timeGetTimer
 
-// Norman Vine ?
-#include <mmsystem.h>
-#include <windef.h>
 int Timer::get_time(struct time_val *tp)
 {
   DWORD t = timeGetTime();
@@ -70,7 +83,6 @@ void Timer::u_sleep(unsigned long usecs) { usleep(usecs); }
 
 #elif USLEEP == 2 // Sleep
 
-#include <windows.h>
 void Timer::u_sleep(unsigned long usecs) { Sleep(usecs / 1000); }
 
 #endif
