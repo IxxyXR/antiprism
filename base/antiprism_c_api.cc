@@ -729,74 +729,81 @@ ANTIPRISM_API AntiStatus anti_geometry_ambo(AntiGeometryHandle geom) {
   }
 }
 
-ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom) {
+static AntiStatus gyro_single(Geometry& g) {
+  std::vector<std::vector<int>> &faces = g.raw_faces();
+  std::vector<Vec3d> &verts = g.raw_verts();
+
+  std::map<std::pair<int,int>, int> edge_vert_map;
+  std::vector<Vec3d> verts_new;
+  int vert_num = 0;
+
+  // Create new vertices: 1/3 along each edge from both ends
+  for (const auto& face : faces) {
+    for (unsigned int j = 0; j < face.size(); j++) {
+      int v1 = face[j];
+      int v2 = face[(j + 1) % face.size()];
+
+      std::pair<int,int> edge_fwd = std::make_pair(v1, v2);
+
+      if (edge_vert_map.find(edge_fwd) == edge_vert_map.end()) {
+        edge_vert_map[edge_fwd] = vert_num++;
+        verts_new.push_back(verts[v1] + (verts[v2] - verts[v1]) * (1.0/3.0));
+      }
+    }
+  }
+
+  // Build new faces
+  std::vector<std::vector<int>> faces_new;
+
+  for (unsigned int i = 0; i < faces.size(); i++) {
+    const auto& face = faces[i];
+
+    // Central n-gon (rotated)
+    std::vector<int> center_face;
+    for (unsigned int j = 0; j < face.size(); j++) {
+      int v1 = face[j];
+      int v2 = face[(j + 1) % face.size()];
+      center_face.push_back(edge_vert_map[std::make_pair(v1, v2)]);
+    }
+    faces_new.push_back(center_face);
+
+    // Triangles at each vertex
+    for (unsigned int j = 0; j < face.size(); j++) {
+      int v1 = face[j];
+      int v2 = face[(j + 1) % face.size()];
+      int v0 = face[(j + face.size() - 1) % face.size()];
+
+      std::vector<int> tri;
+      tri.push_back(edge_vert_map[std::make_pair(v0, v1)]);
+      tri.push_back(edge_vert_map[std::make_pair(v1, v2)]);
+      tri.push_back(edge_vert_map[std::make_pair(v2, v1)]); // reverse edge
+
+      faces_new.push_back(tri);
+    }
+  }
+
+  // Replace geometry
+  g.clear_all();
+  verts = verts_new;
+  for (const auto& f : faces_new)
+    g.add_face(f);
+
+  return ANTI_OK;
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom, int n) {
   if (!geom)
     return ANTI_ERROR_INVALID_HANDLE;
 
   try {
     Geometry& g = *to_geom(geom);
 
-    std::vector<std::vector<int>> &faces = g.raw_faces();
-    std::vector<Vec3d> &verts = g.raw_verts();
-
-    // Get face centers
-    std::vector<Vec3d> centers;
-    g.face_cents(centers);
-
-    std::map<std::pair<int,int>, int> edge_vert_map;
-    std::vector<Vec3d> verts_new;
-    int vert_num = 0;
-
-    // Create new vertices: 1/3 along each edge from both ends
-    for (const auto& face : faces) {
-      for (unsigned int j = 0; j < face.size(); j++) {
-        int v1 = face[j];
-        int v2 = face[(j + 1) % face.size()];
-
-        std::pair<int,int> edge_fwd = std::make_pair(v1, v2);
-
-        if (edge_vert_map.find(edge_fwd) == edge_vert_map.end()) {
-          edge_vert_map[edge_fwd] = vert_num++;
-          verts_new.push_back(verts[v1] + (verts[v2] - verts[v1]) * (1.0/3.0));
-        }
-      }
+    // Apply gyro n times (default 1)
+    for (int i = 0; i < n; i++) {
+      AntiStatus status = gyro_single(g);
+      if (status != ANTI_OK)
+        return status;
     }
-
-    // Build new faces
-    std::vector<std::vector<int>> faces_new;
-
-    for (unsigned int i = 0; i < faces.size(); i++) {
-      const auto& face = faces[i];
-
-      // Central n-gon (rotated)
-      std::vector<int> center_face;
-      for (unsigned int j = 0; j < face.size(); j++) {
-        int v1 = face[j];
-        int v2 = face[(j + 1) % face.size()];
-        center_face.push_back(edge_vert_map[std::make_pair(v1, v2)]);
-      }
-      faces_new.push_back(center_face);
-
-      // Triangles at each vertex
-      for (unsigned int j = 0; j < face.size(); j++) {
-        int v1 = face[j];
-        int v2 = face[(j + 1) % face.size()];
-        int v0 = face[(j + face.size() - 1) % face.size()];
-
-        std::vector<int> tri;
-        tri.push_back(edge_vert_map[std::make_pair(v0, v1)]);
-        tri.push_back(edge_vert_map[std::make_pair(v1, v2)]);
-        tri.push_back(edge_vert_map[std::make_pair(v2, v1)]); // reverse edge
-
-        faces_new.push_back(tri);
-      }
-    }
-
-    // Replace geometry
-    g.clear_all();
-    verts = verts_new;
-    for (const auto& f : faces_new)
-      g.add_face(f);
 
     return ANTI_OK;
   }
@@ -874,110 +881,144 @@ ANTIPRISM_API AntiStatus anti_geometry_zip(AntiGeometryHandle geom) {
   return anti_geometry_dual(geom, 1.0);
 }
 
-ANTIPRISM_API AntiStatus anti_geometry_subdivide(AntiGeometryHandle geom) {
+ANTIPRISM_API AntiStatus anti_geometry_subdivide(AntiGeometryHandle geom, int n, int m) {
   if (!geom)
     return ANTI_ERROR_INVALID_HANDLE;
 
-  try {
-    Geometry& g = *to_geom(geom);
+  // Subdivide n times, m parameter currently unused but reserved for future
+  for (int i = 0; i < n; i++) {
+    try {
+      Geometry& g = *to_geom(geom);
+      std::vector<std::vector<int>> &faces = g.raw_faces();
+      std::vector<Vec3d> &verts = g.raw_verts();
 
-    std::vector<std::vector<int>> &faces = g.raw_faces();
-    std::vector<Vec3d> &verts = g.raw_verts();
+      std::map<std::pair<int,int>, int> edge_verts;
+      std::vector<Vec3d> verts_new = verts;
+      int num_verts = verts.size();
 
-    // Create edge midpoint vertices
-    std::map<std::pair<int,int>, int> edge_verts;
-    std::vector<Vec3d> verts_new = verts; // Keep original vertices
-    int num_verts = verts.size();
+      for (const auto& face : faces) {
+        for (unsigned int j = 0; j < face.size(); j++) {
+          int v1 = face[j];
+          int v2 = face[(j + 1) % face.size()];
+          std::pair<int,int> edge = std::make_pair(std::min(v1, v2), std::max(v1, v2));
 
-    for (const auto& face : faces) {
-      for (unsigned int j = 0; j < face.size(); j++) {
-        int v1 = face[j];
-        int v2 = face[(j + 1) % face.size()];
-        std::pair<int,int> edge = std::make_pair(std::min(v1, v2), std::max(v1, v2));
-
-        if (edge_verts.find(edge) == edge_verts.end()) {
-          edge_verts[edge] = num_verts++;
-          verts_new.push_back((verts[v1] + verts[v2]) * 0.5);
+          if (edge_verts.find(edge) == edge_verts.end()) {
+            edge_verts[edge] = num_verts++;
+            verts_new.push_back((verts[v1] + verts[v2]) * 0.5);
+          }
         }
       }
-    }
 
-    // Create face centers
-    std::vector<Vec3d> centers;
-    g.face_cents(centers);
-    int center_start = num_verts;
-    for (const auto& center : centers) {
-      verts_new.push_back(center);
-    }
-
-    // Build subdivided faces
-    std::vector<std::vector<int>> faces_new;
-
-    for (unsigned int i = 0; i < faces.size(); i++) {
-      const auto& face = faces[i];
-      int face_center = center_start + i;
-
-      for (unsigned int j = 0; j < face.size(); j++) {
-        int v1 = face[j];
-        int v2 = face[(j + 1) % face.size()];
-
-        std::pair<int,int> edge1 = std::make_pair(std::min(v1, v2), std::max(v1, v2));
-        std::pair<int,int> edge2 = std::make_pair(std::min(v2, face[(j + 2) % face.size()]),
-                                                   std::max(v2, face[(j + 2) % face.size()]));
-
-        std::vector<int> quad;
-        quad.push_back(edge_verts[edge1]);
-        quad.push_back(v2);
-        quad.push_back(edge_verts[edge2]);
-        quad.push_back(face_center);
-        faces_new.push_back(quad);
+      std::vector<Vec3d> centers;
+      g.face_cents(centers);
+      int center_start = num_verts;
+      for (const auto& center : centers) {
+        verts_new.push_back(center);
       }
+
+      std::vector<std::vector<int>> faces_new;
+      for (unsigned int i = 0; i < faces.size(); i++) {
+        const auto& face = faces[i];
+        int face_center = center_start + i;
+
+        for (unsigned int j = 0; j < face.size(); j++) {
+          int v1 = face[j];
+          int v2 = face[(j + 1) % face.size()];
+
+          std::pair<int,int> edge1 = std::make_pair(std::min(v1, v2), std::max(v1, v2));
+          std::pair<int,int> edge2 = std::make_pair(std::min(v2, face[(j + 2) % face.size()]),
+                                                     std::max(v2, face[(j + 2) % face.size()]));
+
+          std::vector<int> quad;
+          quad.push_back(edge_verts[edge1]);
+          quad.push_back(v2);
+          quad.push_back(edge_verts[edge2]);
+          quad.push_back(face_center);
+          faces_new.push_back(quad);
+        }
+      }
+
+      g.clear_all();
+      verts = verts_new;
+      for (const auto& f : faces_new)
+        g.add_face(f);
     }
-
-    // Replace geometry
-    g.clear_all();
-    verts = verts_new;
-    for (const auto& f : faces_new)
-      g.add_face(f);
-
-    return ANTI_OK;
+    catch (...) {
+      return ANTI_ERROR_UNKNOWN;
+    }
   }
-  catch (...) {
-    return ANTI_ERROR_UNKNOWN;
-  }
+  return ANTI_OK;
 }
 
-ANTIPRISM_API AntiStatus anti_geometry_expand(AntiGeometryHandle geom) {
+ANTIPRISM_API AntiStatus anti_geometry_expand(AntiGeometryHandle geom, int n, int m) {
   if (!geom)
     return ANTI_ERROR_INVALID_HANDLE;
 
-  // Expand = ambo + ambo (eC = aaC)
-  AntiStatus status = anti_geometry_ambo(geom);
-  if (status != ANTI_OK)
-    return status;
-  return anti_geometry_ambo(geom);
+  // Expand n times
+  for (int i = 0; i < n; i++) {
+    AntiStatus status = anti_geometry_ambo(geom);
+    if (status != ANTI_OK)
+      return status;
+  }
+  return ANTI_OK;
 }
 
-ANTIPRISM_API AntiStatus anti_geometry_meta(AntiGeometryHandle geom) {
+ANTIPRISM_API AntiStatus anti_geometry_meta(AntiGeometryHandle geom, int n) {
   if (!geom)
     return ANTI_ERROR_INVALID_HANDLE;
 
-  // Meta = kis + dual (mC = kdC)
+  // Meta = kis then apply n-1 times, then dual
   AntiStatus status = anti_geometry_kis(geom, 0);
   if (status != ANTI_OK)
     return status;
+
+  for (int i = 1; i < n; i++) {
+    status = anti_geometry_kis(geom, 0);
+    if (status != ANTI_OK)
+      return status;
+  }
+
   return anti_geometry_dual(geom, 1.0);
 }
 
-ANTIPRISM_API AntiStatus anti_geometry_bevel(AntiGeometryHandle geom, double ratio) {
+ANTIPRISM_API AntiStatus anti_geometry_bevel(AntiGeometryHandle geom, int n, double ratio) {
   if (!geom)
     return ANTI_ERROR_INVALID_HANDLE;
 
-  // Bevel = truncate + ambo (bC = taC)
-  AntiStatus status = anti_geometry_truncate(geom, ratio, 0);
+  // Bevel n times
+  for (int i = 0; i < n; i++) {
+    AntiStatus status = anti_geometry_truncate(geom, ratio, 0);
+    if (status != ANTI_OK)
+      return status;
+    status = anti_geometry_ambo(geom);
+    if (status != ANTI_OK)
+      return status;
+  }
+  return ANTI_OK;
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_snub(AntiGeometryHandle geom, int n) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Snub = dual + gyro(n)
+  AntiStatus status = anti_geometry_dual(geom, 1.0);
   if (status != ANTI_OK)
     return status;
-  return anti_geometry_ambo(geom);
+  return anti_geometry_gyro(geom, n);
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_ortho(AntiGeometryHandle geom, int n, int m) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Ortho = join + join (jjC)
+  for (int i = 0; i < n; i++) {
+    AntiStatus status = anti_geometry_join(geom);
+    if (status != ANTI_OK)
+      return status;
+  }
+  return ANTI_OK;
 }
 
 /*---------------------------------------------------------------------------

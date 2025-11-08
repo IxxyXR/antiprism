@@ -329,8 +329,9 @@ ANTIPRISM_API AntiStatus anti_geometry_ambo(AntiGeometryHandle geom);
 
 /** Gyro operation (rotate and subdivide faces)
  * @param geom Handle to geometry object
+ * @param n Gyro parameter (default 1)
  * @return Status code */
-ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom);
+ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom, int n);
 
 /** Join operation (dual of ambo)
  * @param geom Handle to geometry object
@@ -350,24 +351,43 @@ ANTIPRISM_API AntiStatus anti_geometry_zip(AntiGeometryHandle geom);
 
 /** Subdivide operation (subdivide each face into smaller faces)
  * @param geom Handle to geometry object
+ * @param n First parameter (default 2)
+ * @param m Second parameter (default 0)
  * @return Status code */
-ANTIPRISM_API AntiStatus anti_geometry_subdivide(AntiGeometryHandle geom);
+ANTIPRISM_API AntiStatus anti_geometry_subdivide(AntiGeometryHandle geom, int n, int m);
 
 /** Expand operation (ambo + ambo of dual)
  * @param geom Handle to geometry object
+ * @param n First parameter (default 2)
+ * @param m Second parameter (default 0)
  * @return Status code */
-ANTIPRISM_API AntiStatus anti_geometry_expand(AntiGeometryHandle geom);
+ANTIPRISM_API AntiStatus anti_geometry_expand(AntiGeometryHandle geom, int n, int m);
 
 /** Meta operation (kis + dual)
  * @param geom Handle to geometry object
+ * @param n Meta parameter (default 2)
  * @return Status code */
-ANTIPRISM_API AntiStatus anti_geometry_meta(AntiGeometryHandle geom);
+ANTIPRISM_API AntiStatus anti_geometry_meta(AntiGeometryHandle geom, int n);
 
 /** Bevel operation (truncate + ambo)
  * @param geom Handle to geometry object
+ * @param n Bevel parameter (default 2)
  * @param ratio Truncation ratio
  * @return Status code */
-ANTIPRISM_API AntiStatus anti_geometry_bevel(AntiGeometryHandle geom, double ratio);
+ANTIPRISM_API AntiStatus anti_geometry_bevel(AntiGeometryHandle geom, int n, double ratio);
+
+/** Snub operation (dual + gyro)
+ * @param geom Handle to geometry object
+ * @param n Snub parameter (default 2)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_snub(AntiGeometryHandle geom, int n);
+
+/** Ortho operation (combination of operations)
+ * @param geom Handle to geometry object
+ * @param n First parameter (default 2)
+ * @param m Second parameter (default 0)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_ortho(AntiGeometryHandle geom, int n, int m);
 
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
