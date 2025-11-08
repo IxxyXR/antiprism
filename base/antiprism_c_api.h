@@ -332,6 +332,43 @@ ANTIPRISM_API AntiStatus anti_geometry_ambo(AntiGeometryHandle geom);
  * @return Status code */
 ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom);
 
+/** Join operation (dual of ambo)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_join(AntiGeometryHandle geom);
+
+/** Needle operation (elongated kis)
+ * @param geom Handle to geometry object
+ * @param height Height multiplier for needle points
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_needle(AntiGeometryHandle geom, double height);
+
+/** Zip operation (dual of kis)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_zip(AntiGeometryHandle geom);
+
+/** Subdivide operation (subdivide each face into smaller faces)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_subdivide(AntiGeometryHandle geom);
+
+/** Expand operation (ambo + ambo of dual)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_expand(AntiGeometryHandle geom);
+
+/** Meta operation (kis + dual)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_meta(AntiGeometryHandle geom);
+
+/** Bevel operation (truncate + ambo)
+ * @param geom Handle to geometry object
+ * @param ratio Truncation ratio
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_bevel(AntiGeometryHandle geom, double ratio);
+
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
  *---------------------------------------------------------------------------*/

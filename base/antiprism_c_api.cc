@@ -805,6 +805,181 @@ ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom) {
   }
 }
 
+ANTIPRISM_API AntiStatus anti_geometry_join(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Join = dual of ambo (jC = daC)
+  AntiStatus status = anti_geometry_ambo(geom);
+  if (status != ANTI_OK)
+    return status;
+  return anti_geometry_dual(geom, 1.0);
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_needle(AntiGeometryHandle geom, double height) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry& g = *to_geom(geom);
+
+    // Get face centers and scale them outward
+    std::vector<Vec3d> centers;
+    g.face_cents(centers);
+
+    std::vector<std::vector<int>> faces_new;
+    std::vector<int> face;
+
+    const std::vector<std::vector<int>>& faces = g.faces();
+    int num_verts = g.verts().size();
+
+    for (unsigned int i = 0; i < faces.size(); i++) {
+      // Add needle point (scaled outward from face center)
+      Vec3d needle_point = centers[i] * height;
+      g.add_vert(needle_point);
+      int needle_idx = num_verts++;
+
+      // Create triangular faces from needle point to each edge
+      for (unsigned int j = 0; j < faces[i].size(); j++) {
+        face.push_back(needle_idx);
+        face.push_back(faces[i][j]);
+        face.push_back(faces[i][(j + 1) % faces[i].size()]);
+        faces_new.push_back(face);
+        face.clear();
+      }
+    }
+
+    // Replace faces
+    if (faces_new.size() > 0) {
+      g.clear(FACES);
+      for (const auto& f : faces_new)
+        g.add_face(f);
+    }
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_zip(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Zip = dual of kis (zC = dkC)
+  AntiStatus status = anti_geometry_kis(geom, 0);
+  if (status != ANTI_OK)
+    return status;
+  return anti_geometry_dual(geom, 1.0);
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_subdivide(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry& g = *to_geom(geom);
+
+    std::vector<std::vector<int>> &faces = g.raw_faces();
+    std::vector<Vec3d> &verts = g.raw_verts();
+
+    // Create edge midpoint vertices
+    std::map<std::pair<int,int>, int> edge_verts;
+    std::vector<Vec3d> verts_new = verts; // Keep original vertices
+    int num_verts = verts.size();
+
+    for (const auto& face : faces) {
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+        std::pair<int,int> edge = std::make_pair(std::min(v1, v2), std::max(v1, v2));
+
+        if (edge_verts.find(edge) == edge_verts.end()) {
+          edge_verts[edge] = num_verts++;
+          verts_new.push_back((verts[v1] + verts[v2]) * 0.5);
+        }
+      }
+    }
+
+    // Create face centers
+    std::vector<Vec3d> centers;
+    g.face_cents(centers);
+    int center_start = num_verts;
+    for (const auto& center : centers) {
+      verts_new.push_back(center);
+    }
+
+    // Build subdivided faces
+    std::vector<std::vector<int>> faces_new;
+
+    for (unsigned int i = 0; i < faces.size(); i++) {
+      const auto& face = faces[i];
+      int face_center = center_start + i;
+
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+
+        std::pair<int,int> edge1 = std::make_pair(std::min(v1, v2), std::max(v1, v2));
+        std::pair<int,int> edge2 = std::make_pair(std::min(v2, face[(j + 2) % face.size()]),
+                                                   std::max(v2, face[(j + 2) % face.size()]));
+
+        std::vector<int> quad;
+        quad.push_back(edge_verts[edge1]);
+        quad.push_back(v2);
+        quad.push_back(edge_verts[edge2]);
+        quad.push_back(face_center);
+        faces_new.push_back(quad);
+      }
+    }
+
+    // Replace geometry
+    g.clear_all();
+    verts = verts_new;
+    for (const auto& f : faces_new)
+      g.add_face(f);
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_expand(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Expand = ambo + ambo (eC = aaC)
+  AntiStatus status = anti_geometry_ambo(geom);
+  if (status != ANTI_OK)
+    return status;
+  return anti_geometry_ambo(geom);
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_meta(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Meta = kis + dual (mC = kdC)
+  AntiStatus status = anti_geometry_kis(geom, 0);
+  if (status != ANTI_OK)
+    return status;
+  return anti_geometry_dual(geom, 1.0);
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_bevel(AntiGeometryHandle geom, double ratio) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Bevel = truncate + ambo (bC = taC)
+  AntiStatus status = anti_geometry_truncate(geom, ratio, 0);
+  if (status != ANTI_OK)
+    return status;
+  return anti_geometry_ambo(geom);
+}
+
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
  *---------------------------------------------------------------------------*/

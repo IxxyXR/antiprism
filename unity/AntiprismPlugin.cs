@@ -590,6 +590,71 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Join operation - dual of ambo (creates rhombic faces)
+        /// </summary>
+        public Status Join()
+        {
+            CheckDisposed();
+            return anti_geometry_join(handle);
+        }
+
+        /// <summary>
+        /// Needle operation - elongated kis (creates sharp spikes)
+        /// </summary>
+        /// <param name="height">Height multiplier for needle points</param>
+        public Status Needle(double height = 2.0)
+        {
+            CheckDisposed();
+            return anti_geometry_needle(handle, height);
+        }
+
+        /// <summary>
+        /// Zip operation - dual of kis (creates vertices where kis placed pyramids)
+        /// </summary>
+        public Status Zip()
+        {
+            CheckDisposed();
+            return anti_geometry_zip(handle);
+        }
+
+        /// <summary>
+        /// Subdivide operation - subdivide each face into smaller quadrilateral faces
+        /// </summary>
+        public Status Subdivide()
+        {
+            CheckDisposed();
+            return anti_geometry_subdivide(handle);
+        }
+
+        /// <summary>
+        /// Expand operation - double ambo (separates faces with squares)
+        /// </summary>
+        public Status Expand()
+        {
+            CheckDisposed();
+            return anti_geometry_expand(handle);
+        }
+
+        /// <summary>
+        /// Meta operation - kis + dual (creates complex stellated forms)
+        /// </summary>
+        public Status Meta()
+        {
+            CheckDisposed();
+            return anti_geometry_meta(handle);
+        }
+
+        /// <summary>
+        /// Bevel operation - truncate + ambo (chamfers edges and vertices)
+        /// </summary>
+        /// <param name="ratio">Truncation ratio</param>
+        public Status Bevel(double ratio = 0.3333)
+        {
+            CheckDisposed();
+            return anti_geometry_bevel(handle, ratio);
+        }
+
+        /// <summary>
         /// Get all vertex normals (averaged from surrounding face normals)
         /// </summary>
         public Vector3[] GetVertexNormals()
@@ -758,6 +823,27 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_gyro(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_join(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_needle(IntPtr geom, double height);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_zip(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_subdivide(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_expand(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_meta(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_bevel(IntPtr geom, double ratio);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_get_vertex_normals(IntPtr geom, double[] normals, int max_verts);
