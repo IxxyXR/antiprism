@@ -300,6 +300,22 @@ ANTIPRISM_API AntiStatus anti_geometry_orient(AntiGeometryHandle geom);
  * @return Status code */
 ANTIPRISM_API AntiStatus anti_geometry_orient_reverse(AntiGeometryHandle geom);
 
+/** Create dual polyhedron
+ * @param geom Handle to geometry object (will be replaced with its dual)
+ * @param recip_rad Reciprocation radius (0 for automatic)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_dual(AntiGeometryHandle geom,
+                                             double recip_rad);
+
+/** Truncate vertices
+ * @param geom Handle to geometry object
+ * @param ratio Truncation ratio (0.0-1.0, typically 0.3-0.5)
+ * @param order Truncate only vertices with this vertex order (0 for all)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_truncate(AntiGeometryHandle geom,
+                                                 double ratio,
+                                                 int order);
+
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
  *---------------------------------------------------------------------------*/

@@ -80,6 +80,14 @@ public class PolyhedronExample : MonoBehaviour
     [Tooltip("Rotation speed (degrees per second)")]
     public Vector3 rotationSpeed = new Vector3(0, 30, 0);
 
+    [Header("Debug")]
+    [Tooltip("Visualize face normals (green lines)")]
+    public bool debugShowNormals = false;
+
+    [Tooltip("Length of normal visualization lines")]
+    [Range(0.1f, 2.0f)]
+    public float normalLength = 0.3f;
+
     private MeshFilter meshFilter;
     private Mesh mesh;
 
@@ -103,6 +111,56 @@ public class PolyhedronExample : MonoBehaviour
         if (autoRotate)
         {
             transform.Rotate(rotationSpeed * Time.deltaTime);
+        }
+
+        if (debugShowNormals && mesh != null)
+        {
+            DrawNormals();
+        }
+    }
+
+    /// <summary>
+    /// Draw normal vectors for debugging
+    /// </summary>
+    void DrawNormals()
+    {
+        if (mesh == null || mesh.vertices.Length == 0)
+            return;
+
+        Vector3[] vertices = mesh.vertices;
+        Vector3[] normals = mesh.normals;
+        int[] triangles = mesh.triangles;
+
+        // Draw face normals (averaged from triangle vertices)
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            // Get triangle vertices
+            Vector3 v0 = transform.TransformPoint(vertices[triangles[i]]);
+            Vector3 v1 = transform.TransformPoint(vertices[triangles[i + 1]]);
+            Vector3 v2 = transform.TransformPoint(vertices[triangles[i + 2]]);
+
+            // Calculate face center
+            Vector3 center = (v0 + v1 + v2) / 3f;
+
+            // Calculate face normal
+            Vector3 edge1 = v1 - v0;
+            Vector3 edge2 = v2 - v0;
+            Vector3 normal = Vector3.Cross(edge1, edge2).normalized;
+
+            // Draw normal (green for outward, red for inward relative to origin)
+            Color normalColor = Vector3.Dot(normal, center.normalized) > 0 ? Color.green : Color.red;
+            Debug.DrawLine(center, center + normal * normalLength, normalColor);
+        }
+
+        // Optionally draw vertex normals (cyan)
+        if (flatShading == false && normals.Length > 0)
+        {
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                Vector3 worldPos = transform.TransformPoint(vertices[i]);
+                Vector3 worldNormal = transform.TransformDirection(normals[i]).normalized;
+                Debug.DrawLine(worldPos, worldPos + worldNormal * normalLength * 0.7f, Color.cyan);
+            }
         }
     }
 
@@ -220,12 +278,12 @@ public class PolyhedronExample : MonoBehaviour
         {
             case ModifierType.Dual:
                 // Create dual polyhedron (vertices become faces, faces become vertices)
-                CreateDual(geom);
+                geom.Dual();
                 break;
 
             case ModifierType.Truncate:
-                // Truncate vertices
-                geom.Triangulate();
+                // Truncate vertices (cut off corners)
+                geom.Truncate(0.3333);
                 break;
 
             case ModifierType.ConvexHull:
@@ -238,17 +296,6 @@ public class PolyhedronExample : MonoBehaviour
                 // No modifier
                 break;
         }
-    }
-
-    /// <summary>
-    /// Create dual polyhedron using OFF string export/import
-    /// (Note: A proper dual function would be better - this is a workaround)
-    /// </summary>
-    void CreateDual(Geometry geom)
-    {
-        // For now, just triangulate as a placeholder
-        // TODO: Implement proper dual operation when available in C API
-        geom.Triangulate();
     }
 
     /// <summary>

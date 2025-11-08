@@ -151,6 +151,12 @@ namespace Antiprism
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_geometry_orient_reverse(IntPtr geom);
 
+        [DllImport(LIBRARY_NAME)]
+        private static extern Status anti_geometry_dual(IntPtr geom, double recip_rad);
+
+        [DllImport(LIBRARY_NAME)]
+        private static extern Status anti_geometry_truncate(IntPtr geom, double ratio, int order);
+
         // Polyhedra Generators
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_conway_notation(IntPtr geom, string notation);
@@ -538,6 +544,27 @@ namespace Antiprism
         {
             CheckDisposed();
             return anti_geometry_triangulate(handle);
+        }
+
+        /// <summary>
+        /// Create the dual polyhedron (vertices become faces, faces become vertices)
+        /// </summary>
+        /// <param name="recipRadius">Reciprocation radius (0 for automatic)</param>
+        public Status Dual(double recipRadius = 0.0)
+        {
+            CheckDisposed();
+            return anti_geometry_dual(handle, recipRadius);
+        }
+
+        /// <summary>
+        /// Truncate vertices (cut off corners)
+        /// </summary>
+        /// <param name="ratio">Truncation ratio (0.0-1.0, typically 0.3-0.5)</param>
+        /// <param name="order">Truncate only vertices with this vertex order (0 for all)</param>
+        public Status Truncate(double ratio = 0.3333, int order = 0)
+        {
+            CheckDisposed();
+            return anti_geometry_truncate(handle, ratio, order);
         }
 
         /// <summary>

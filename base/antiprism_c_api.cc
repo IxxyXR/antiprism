@@ -571,6 +571,37 @@ ANTIPRISM_API AntiStatus anti_geometry_orient_reverse(AntiGeometryHandle geom) {
   }
 }
 
+ANTIPRISM_API AntiStatus anti_geometry_dual(AntiGeometryHandle geom,
+                                             double recip_rad) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry dual;
+    get_dual(dual, *to_geom(geom), recip_rad);
+    *to_geom(geom) = dual;
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_truncate(AntiGeometryHandle geom,
+                                                 double ratio,
+                                                 int order) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    truncate_verts(*to_geom(geom), ratio, order);
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
  *---------------------------------------------------------------------------*/
