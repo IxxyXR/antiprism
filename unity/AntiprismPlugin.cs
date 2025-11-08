@@ -155,13 +155,6 @@ namespace Antiprism
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_conway_notation(IntPtr geom, string notation);
 
-        // Zonohedra Generators
-        [DllImport(LIBRARY_NAME)]
-        private static extern Status anti_make_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors);
-
-        [DllImport(LIBRARY_NAME)]
-        private static extern Status anti_make_polar_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors, int step, int spiral_step);
-
         // Geometry Information
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_geometry_centroid(IntPtr geom, out double x, out double y, out double z);
@@ -696,5 +689,11 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_get_face_normals(IntPtr geom, double[] normals, int max_faces);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_polar_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors, int step, int spiral_step);
     }
 }
