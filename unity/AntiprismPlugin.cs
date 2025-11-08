@@ -348,24 +348,53 @@ namespace Antiprism
         /// Apply to a Unity Mesh
         /// </summary>
         /// <param name="mesh">Unity mesh to populate</param>
-        /// <param name="useAntiprismNormals">If true, use Antiprism-calculated normals (averaged from face normals). If false, use Unity's RecalculateNormals (default)</param>
-        public void ApplyToMesh(Mesh mesh, bool useAntiprismNormals = false)
+        /// <param name="flatShaded">If true, create hard edges (faceted polyhedron look). If false, smooth shading across edges</param>
+        public void ApplyToMesh(Mesh mesh, bool flatShaded = true)
         {
             CheckDisposed();
             if (mesh == null)
                 throw new ArgumentNullException("mesh");
 
             mesh.Clear();
-            mesh.vertices = GetVertices();
-            mesh.triangles = GetTriangles();
 
-            if (useAntiprismNormals)
+            if (flatShaded)
             {
-                mesh.normals = GetVertexNormals();
+                // For flat shading, duplicate vertices so each face has its own vertices
+                // This creates hard edges - the correct look for polyhedra!
+                Vector3[] baseVerts = GetVertices();
+                int[] baseTris = GetTriangles();
+                Vector3[] faceNormals = GetFaceNormals();
+
+                // Each triangle gets its own copy of vertices
+                int numTriangles = baseTris.Length / 3;
+                Vector3[] verts = new Vector3[numTriangles * 3];
+                Vector3[] normals = new Vector3[numTriangles * 3];
+                int[] triangles = new int[numTriangles * 3];
+
+                for (int i = 0; i < numTriangles; i++)
+                {
+                    int faceIdx = i; // After triangulation, each triangle is its own face
+                    Vector3 faceNormal = faceIdx < faceNormals.Length ? faceNormals[faceIdx] : Vector3.up;
+
+                    for (int j = 0; j < 3; j++)
+                    {
+                        int vertIdx = i * 3 + j;
+                        verts[vertIdx] = baseVerts[baseTris[i * 3 + j]];
+                        normals[vertIdx] = faceNormal;
+                        triangles[vertIdx] = vertIdx;
+                    }
+                }
+
+                mesh.vertices = verts;
+                mesh.normals = normals;
+                mesh.triangles = triangles;
             }
             else
             {
-                mesh.RecalculateNormals();
+                // Smooth shading - share vertices, average normals
+                mesh.vertices = GetVertices();
+                mesh.triangles = GetTriangles();
+                mesh.normals = GetVertexNormals();
             }
 
             mesh.RecalculateBounds();
