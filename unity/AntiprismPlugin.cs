@@ -151,12 +151,6 @@ namespace Antiprism
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_geometry_orient_reverse(IntPtr geom);
 
-        [DllImport(LIBRARY_NAME)]
-        private static extern Status anti_geometry_dual(IntPtr geom, double recip_rad);
-
-        [DllImport(LIBRARY_NAME)]
-        private static extern Status anti_geometry_truncate(IntPtr geom, double ratio, int order);
-
         // Polyhedra Generators
         [DllImport(LIBRARY_NAME)]
         private static extern Status anti_conway_notation(IntPtr geom, string notation);
@@ -719,6 +713,12 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_orient(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_dual(IntPtr geom, double recip_rad);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_truncate(IntPtr geom, double ratio, int order);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_get_vertex_normals(IntPtr geom, double[] normals, int max_verts);
