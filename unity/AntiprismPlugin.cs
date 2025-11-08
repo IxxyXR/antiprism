@@ -532,6 +532,15 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Triangulate all faces (convert to triangles)
+        /// </summary>
+        public Status Triangulate()
+        {
+            CheckDisposed();
+            return anti_geometry_triangulate(handle);
+        }
+
+        /// <summary>
         /// Get all vertex normals (averaged from surrounding face normals)
         /// </summary>
         public Vector3[] GetVertexNormals()
