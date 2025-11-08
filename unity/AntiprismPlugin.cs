@@ -577,10 +577,11 @@ namespace Antiprism
             Vector3[] vnormals = new Vector3[actual];
             for (int i = 0; i < actual; i++)
             {
+                // Negate normals because we reverse triangle winding for Unity
                 vnormals[i] = new Vector3(
-                    (float)normals[i * 3 + 0],
-                    (float)normals[i * 3 + 1],
-                    (float)normals[i * 3 + 2]
+                    -(float)normals[i * 3 + 0],
+                    -(float)normals[i * 3 + 1],
+                    -(float)normals[i * 3 + 2]
                 );
             }
 
@@ -603,10 +604,11 @@ namespace Antiprism
             Vector3[] fnormals = new Vector3[actual];
             for (int i = 0; i < actual; i++)
             {
+                // Negate normals because we reverse triangle winding for Unity
                 fnormals[i] = new Vector3(
-                    (float)normals[i * 3 + 0],
-                    (float)normals[i * 3 + 1],
-                    (float)normals[i * 3 + 2]
+                    -(float)normals[i * 3 + 0],
+                    -(float)normals[i * 3 + 1],
+                    -(float)normals[i * 3 + 2]
                 );
             }
 

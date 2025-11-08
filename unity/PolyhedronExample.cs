@@ -278,17 +278,23 @@ public class PolyhedronExample : MonoBehaviour
         {
             case ModifierType.Dual:
                 // Create dual polyhedron (vertices become faces, faces become vertices)
-                geom.Dual();
+                Status dualStatus = geom.Dual();
+                if (dualStatus != Status.OK)
+                    Debug.LogWarning($"Dual operation failed: {dualStatus}");
                 break;
 
             case ModifierType.Truncate:
                 // Truncate vertices (cut off corners)
-                geom.Truncate(0.3333);
+                Status truncStatus = geom.Truncate(0.3333);
+                if (truncStatus != Status.OK)
+                    Debug.LogWarning($"Truncate operation failed: {truncStatus}");
                 break;
 
             case ModifierType.ConvexHull:
                 // Calculate convex hull
-                geom.ConvexHull();
+                Status hullStatus = geom.ConvexHull();
+                if (hullStatus != Status.OK)
+                    Debug.LogWarning($"ConvexHull operation failed: {hullStatus}");
                 break;
 
             case ModifierType.None:
