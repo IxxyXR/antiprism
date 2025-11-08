@@ -37,8 +37,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 #elif UTIMER == 2 // timeGetTimer
+#include <windows.h>
 #include <mmsystem.h>
-#include <windef.h>
 #endif
 
 #if USLEEP == 1 // usleep
