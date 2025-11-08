@@ -1,12 +1,16 @@
 # CMakeLists.txt for tesselator library
 
 set(TESS_SOURCES
-    dict.c
-    geom.c
-    mesh.c
-    priorityq.c
-    sweep.c
-    tess.c
+    dict.cc
+    geom.cc
+    memalloc.cc
+    mesh.cc
+    normal.cc
+    priorityq.cc
+    render.cc
+    sweep.cc
+    tess.cc
+    tessmono.cc
 )
 
 add_library(tesselator STATIC ${TESS_SOURCES})

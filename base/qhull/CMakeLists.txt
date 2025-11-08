@@ -1,18 +1,23 @@
 # CMakeLists.txt for qhull library
 
 set(QHULL_SOURCES
-    geom2.c
-    geom.c
-    global.c
-    io.c
-    libqhull.c
-    mem.c
-    merge.c
-    poly2.c
-    poly.c
-    qset.c
-    stat.c
-    user.c
+    geom2_r.cc
+    geom_r.cc
+    global_r.cc
+    io_r.cc
+    libqhull_r.cc
+    mem_r.cc
+    merge_r.cc
+    poly2_r.cc
+    poly_r.cc
+    qset_r.cc
+    random_r.cc
+    rboxlib_r.cc
+    stat_r.cc
+    usermem_r.cc
+    userprintf_rbox_r.cc
+    userprintf_r.cc
+    user_r.cc
 )
 
 add_library(qhull STATIC ${QHULL_SOURCES})

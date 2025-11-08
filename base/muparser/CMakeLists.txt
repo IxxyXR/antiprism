@@ -1,13 +1,15 @@
 # CMakeLists.txt for muparser library
 
 set(MUPARSER_SOURCES
-    muParser.cpp
-    muParserBase.cpp
-    muParserBytecode.cpp
-    muParserCallback.cpp
-    muParserError.cpp
-    muParserInt.cpp
-    muParserTokenReader.cpp
+    muParser.cc
+    muParserBase.cc
+    muParserBytecode.cc
+    muParserCallback.cc
+    muParserDLL.cc
+    muParserError.cc
+    muParserInt.cc
+    muParserTest.cc
+    muParserTokenReader.cc
 )
 
 add_library(muparser STATIC ${MUPARSER_SOURCES})
