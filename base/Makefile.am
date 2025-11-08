@@ -17,6 +17,7 @@ libantiprism_la_SOURCES = \
 	timer.cc polygon.cc povwriter.cc scene.cc \
 	canonical.cc trans.cc faces.cc vrmlwriter.cc \
 	wythoff.cc wythoff_tiling.cc wythoff_ops.cc planar.cc \
+	antiprism_c_api.cc \
 	\
 	antiprism.h boundbox.h elemprops.h colormap.h coloring.h color.h \
 	const.h displaypoly.h geometry.h geometryutils.h geometryinfo.h \
@@ -24,6 +25,7 @@ libantiprism_la_SOURCES = \
 	polygon.h povwriter.h \
 	programopts.h random.h scene.h status.h symmetry.h tiling.h timer.h \
 	utils.h getopt.h vec3d.h vec4d.h vec_utils.h vrmlwriter.h planar.h \
+	antiprism_c_api.h \
 	\
 	private_geodesic.h private_misc.h private_named_cols.h \
 	private_off_file.h private_prop_col.h private_std_polys.h
@@ -43,6 +45,7 @@ pkginclude_HEADERS =
 else
 pkginclude_HEADERS = \
 	antiprism.h \
+	antiprism_c_api.h \
 	boundbox.h \
 	colormap.h \
 	color.h \
@@ -74,5 +77,5 @@ pkginclude_HEADERS = \
 	vec4d.h \
 	vec_utils.h \
 	vrmlwriter.h
-	
+
 endif
