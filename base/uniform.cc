@@ -115,6 +115,7 @@ U74   great retrosnub icosidodecahedron
 */
 
 #include "private_std_polys.h"
+#include "platform_compat.h"
 
 #include <cctype>
 #include <cfloat>
@@ -122,7 +123,9 @@ U74   great retrosnub icosidodecahedron
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#ifndef PLATFORM_NO_UNISTD
 #include <unistd.h>
+#endif
 #include <vector>
 
 using std::string;

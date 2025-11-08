@@ -157,6 +157,7 @@ target_link_libraries(antiprism
 # Compiler definitions
 target_compile_definitions(antiprism PRIVATE
     SUPDIR="${CMAKE_INSTALL_PREFIX}/share/antiprism"
+    VERSION="${PROJECT_VERSION}"
 )
 
 if(BUILD_UNITY_PLUGIN)

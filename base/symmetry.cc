@@ -32,11 +32,17 @@
 #include "utils.h"
 
 #include <algorithm>
+#include <iterator>
 #include <cstdlib>
+#include <iterator>
 #include <cstring>
+#include <iterator>
 #include <map>
+#include <iterator>
 #include <numeric>
+#include <iterator>
 #include <set>
+#include <iterator>
 
 using std::map;
 using std::pair;

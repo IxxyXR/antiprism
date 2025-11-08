@@ -31,12 +31,19 @@
 #include "geometryutils.h"
 
 #include <algorithm>
+#include <iterator>
 #include <cstdio>
+#include <iterator>
 #include <cstdlib>
+#include <iterator>
 #include <functional>
+#include <iterator>
 #include <map>
+#include <iterator>
 #include <string>
+#include <iterator>
 #include <vector>
+#include <iterator>
 
 using std::map;
 using std::pair;

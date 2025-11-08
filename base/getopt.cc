@@ -37,6 +37,7 @@
 
 #undef ULTRAGETOPT_REPLACE_GETOPT /* Protect against project-wide defines */
 #include "getopt.h"
+#include "platform_compat.h"
 
 /* Define replacements for missing functions */
 #if !HAVE_STRCASECMP && HAVE__STRICMP
