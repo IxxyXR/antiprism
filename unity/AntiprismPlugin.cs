@@ -347,7 +347,9 @@ namespace Antiprism
         /// <summary>
         /// Apply to a Unity Mesh
         /// </summary>
-        public void ApplyToMesh(Mesh mesh)
+        /// <param name="mesh">Unity mesh to populate</param>
+        /// <param name="useAntiprismNormals">If true, use Antiprism-calculated normals (averaged from face normals). If false, use Unity's RecalculateNormals (default)</param>
+        public void ApplyToMesh(Mesh mesh, bool useAntiprismNormals = false)
         {
             CheckDisposed();
             if (mesh == null)
@@ -356,7 +358,16 @@ namespace Antiprism
             mesh.Clear();
             mesh.vertices = GetVertices();
             mesh.triangles = GetTriangles();
-            mesh.RecalculateNormals();
+
+            if (useAntiprismNormals)
+            {
+                mesh.normals = GetVertexNormals();
+            }
+            else
+            {
+                mesh.RecalculateNormals();
+            }
+
             mesh.RecalculateBounds();
         }
 
