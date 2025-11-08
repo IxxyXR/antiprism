@@ -109,32 +109,32 @@ public:
 template <class T> void ElemProps<T>::set(int idx, const T &prop)
 {
   if (prop.is_set())
-    ElemProps[idx] = prop;
+    this->ElemProps[idx] = prop;
   else
     del(idx);
 }
 
-template <class T> void ElemProps<T>::del(int idx) { ElemProps.erase(idx); }
+template <class T> void ElemProps<T>::del(int idx) { this->ElemProps.erase(idx); }
 
 template <class T> T ElemProps<T>::get(int idx) const
 {
-  auto mi = ElemProps.find(idx);
-  if (mi != ElemProps.end())
+  auto mi = this->ElemProps.find(idx);
+  if (mi != this->ElemProps.end())
     return mi->second;
   else
     return T();
 }
 
-template <class T> void ElemProps<T>::clear() { ElemProps.clear(); }
+template <class T> void ElemProps<T>::clear() { this->ElemProps.clear(); }
 
 template <class T> const std::map<int, T> &ElemProps<T>::get_properties() const
 {
-  return ElemProps;
+  return this->ElemProps;
 }
 
 template <class T> std::map<int, T> &ElemProps<T>::get_properties()
 {
-  return ElemProps;
+  return this->ElemProps;
 }
 
 template <class T> void ElemProps<T>::remap(const std::map<int, int> &chg_map)
@@ -144,13 +144,13 @@ template <class T> void ElemProps<T>::remap(const std::map<int, int> &chg_map)
   std::map<int, T> new_props;
   for (const auto &kp : chg_map) {
     if (kp.second != -1) {
-      auto cmi = ElemProps.find(kp.first);
-      if (cmi != ElemProps.end())
+      auto cmi = this->ElemProps.find(kp.first);
+      if (cmi != this->ElemProps.end())
         new_props[kp.second] = cmi->second;
     }
   }
 
-  ElemProps = new_props;
+  this->ElemProps = new_props;
 }
 
 template <class T>
