@@ -524,6 +524,58 @@ namespace Antiprism
             return fnormals;
         }
 
+        /// <summary>
+        /// Get polyhedron data in a clean format for mesh libraries.
+        /// Preserves original face structure (no triangulation) - pentagons stay pentagons!
+        /// </summary>
+        /// <param name="vertices">All vertices as Vector3</param>
+        /// <param name="faceIndices">Each face as array of vertex indices</param>
+        public void GetPolyhedronData(out Vector3[] vertices, out int[][] faceIndices)
+        {
+            CheckDisposed();
+
+            // Get vertices
+            vertices = GetVertices();
+
+            // Get faces in original form (not triangulated)
+            int faceCount = FaceCount;
+            if (faceCount == 0)
+            {
+                faceIndices = new int[0][];
+                return;
+            }
+
+            // Allocate buffer for face data (estimate size)
+            int bufferSize = faceCount * 10; // Most faces won't exceed 10 vertices
+            int[] buffer = new int[bufferSize];
+            int totalSize = anti_geometry_get_all_faces(handle, buffer, bufferSize);
+
+            if (totalSize < 0)
+            {
+                faceIndices = new int[0][];
+                return;
+            }
+
+            // Parse the buffer into face arrays
+            System.Collections.Generic.List<int[]> faces = new System.Collections.Generic.List<int[]>();
+            int offset = 0;
+            while (offset < totalSize && faces.Count < faceCount)
+            {
+                int faceSize = buffer[offset];
+                offset++;
+
+                int[] face = new int[faceSize];
+                for (int i = 0; i < faceSize; i++)
+                {
+                    face[i] = buffer[offset];
+                    offset++;
+                }
+                faces.Add(face);
+            }
+
+            faceIndices = faces.ToArray();
+        }
+
         // P/Invoke imports
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern IntPtr anti_geometry_create();
