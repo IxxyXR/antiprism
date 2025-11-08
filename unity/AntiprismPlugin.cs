@@ -38,15 +38,15 @@ namespace Antiprism
     {
         // Platform-specific library names
         #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-        private const string LIBRARY_NAME = "antiprism";
+        internal const string LIBRARY_NAME = "antiprism";
         #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-        private const string LIBRARY_NAME = "libantiprism";
+        internal const string LIBRARY_NAME = "libantiprism";
         #elif UNITY_ANDROID
-        private const string LIBRARY_NAME = "antiprism";
+        internal const string LIBRARY_NAME = "antiprism";
         #elif UNITY_IOS
-        private const string LIBRARY_NAME = "__Internal";
+        internal const string LIBRARY_NAME = "__Internal";
         #else
-        private const string LIBRARY_NAME = "antiprism";
+        internal const string LIBRARY_NAME = "antiprism";
         #endif
 
         /*-----------------------------------------------------------------------
