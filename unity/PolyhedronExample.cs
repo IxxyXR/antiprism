@@ -54,6 +54,9 @@ public class PolyhedronExample : MonoBehaviour
         None,
         Dual,
         Truncate,
+        Kis,
+        Ambo,
+        Gyro,
         ConvexHull
     }
 
@@ -290,6 +293,27 @@ public class PolyhedronExample : MonoBehaviour
                 Status truncStatus = geom.Truncate(0.3333);
                 if (truncStatus != Status.OK)
                     Debug.LogWarning($"Truncate operation failed: {truncStatus}");
+                break;
+
+            case ModifierType.Kis:
+                // Place pyramid on each face
+                Status kisStatus = geom.Kis();
+                if (kisStatus != Status.OK)
+                    Debug.LogWarning($"Kis operation failed: {kisStatus}");
+                break;
+
+            case ModifierType.Ambo:
+                // Create vertices at edge midpoints (rectify)
+                Status amboStatus = geom.Ambo();
+                if (amboStatus != Status.OK)
+                    Debug.LogWarning($"Ambo operation failed: {amboStatus}");
+                break;
+
+            case ModifierType.Gyro:
+                // Rotate and subdivide faces
+                Status gyroStatus = geom.Gyro();
+                if (gyroStatus != Status.OK)
+                    Debug.LogWarning($"Gyro operation failed: {gyroStatus}");
                 break;
 
             case ModifierType.ConvexHull:

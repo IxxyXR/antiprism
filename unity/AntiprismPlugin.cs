@@ -562,6 +562,34 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Kis operation - place a pyramid on each face
+        /// </summary>
+        /// <param name="n">Only kis faces with n sides (0 for all faces)</param>
+        public Status Kis(int n = 0)
+        {
+            CheckDisposed();
+            return anti_geometry_kis(handle, n);
+        }
+
+        /// <summary>
+        /// Ambo operation - create vertices at edge midpoints (also known as rectify)
+        /// </summary>
+        public Status Ambo()
+        {
+            CheckDisposed();
+            return anti_geometry_ambo(handle);
+        }
+
+        /// <summary>
+        /// Gyro operation - rotate and subdivide faces creating pentagons
+        /// </summary>
+        public Status Gyro()
+        {
+            CheckDisposed();
+            return anti_geometry_gyro(handle);
+        }
+
+        /// <summary>
         /// Get all vertex normals (averaged from surrounding face normals)
         /// </summary>
         public Vector3[] GetVertexNormals()
@@ -721,6 +749,15 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_truncate(IntPtr geom, double ratio, int order);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_kis(IntPtr geom, int n);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_ambo(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_gyro(IntPtr geom);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_get_vertex_normals(IntPtr geom, double[] normals, int max_verts);

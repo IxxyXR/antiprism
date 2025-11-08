@@ -316,6 +316,22 @@ ANTIPRISM_API AntiStatus anti_geometry_truncate(AntiGeometryHandle geom,
                                                  double ratio,
                                                  int order);
 
+/** Kis operation (place pyramid on each face)
+ * @param geom Handle to geometry object
+ * @param n Only kis faces with n sides (0 for all faces)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_kis(AntiGeometryHandle geom, int n);
+
+/** Ambo operation (create vertices at edge midpoints)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_ambo(AntiGeometryHandle geom);
+
+/** Gyro operation (rotate and subdivide faces)
+ * @param geom Handle to geometry object
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom);
+
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
  *---------------------------------------------------------------------------*/

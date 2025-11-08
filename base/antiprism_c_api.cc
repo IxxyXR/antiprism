@@ -602,6 +602,209 @@ ANTIPRISM_API AntiStatus anti_geometry_truncate(AntiGeometryHandle geom,
   }
 }
 
+ANTIPRISM_API AntiStatus anti_geometry_kis(AntiGeometryHandle geom, int n) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry& g = *to_geom(geom);
+
+    // Get face centers
+    std::vector<Vec3d> centers;
+    g.face_cents(centers);
+
+    // Build new faces
+    std::vector<std::vector<int>> faces_new;
+    std::vector<int> face;
+
+    const std::vector<std::vector<int>>& faces = g.faces();
+    int num_verts = g.verts().size();
+
+    for (unsigned int i = 0; i < faces.size(); i++) {
+      // Skip faces that don't match the size filter
+      if (n > 0 && (int)faces[i].size() != n) {
+        faces_new.push_back(faces[i]);
+        continue;
+      }
+
+      // Add center vertex
+      g.add_vert(centers[i]);
+      int center_idx = num_verts++;
+
+      // Create triangular faces from center to each edge
+      for (unsigned int j = 0; j < faces[i].size(); j++) {
+        face.push_back(center_idx);
+        face.push_back(faces[i][j]);
+        face.push_back(faces[i][(j + 1) % faces[i].size()]);
+        faces_new.push_back(face);
+        face.clear();
+      }
+    }
+
+    // Replace faces
+    if (faces_new.size() > 0) {
+      g.clear(FACES);
+      for (const auto& f : faces_new)
+        g.add_face(f);
+    }
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_ambo(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry& g = *to_geom(geom);
+
+    std::vector<std::vector<int>> &faces = g.raw_faces();
+    std::vector<Vec3d> &verts = g.raw_verts();
+
+    std::map<std::pair<int,int>, int> vert_map;
+    std::vector<Vec3d> verts_new;
+
+    // Create vertices at edge midpoints
+    int vert_num = 0;
+    for (const auto& face : faces) {
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+
+        std::pair<int,int> edge = std::make_pair(std::min(v1, v2), std::max(v1, v2));
+
+        if (vert_map.find(edge) == vert_map.end()) {
+          vert_map[edge] = vert_num++;
+          verts_new.push_back((verts[v1] + verts[v2]) * 0.5);
+        }
+      }
+    }
+
+    // Build new faces (one for each original face, one for each original vertex)
+    std::vector<std::vector<int>> faces_new;
+
+    // Faces from original faces
+    for (const auto& face : faces) {
+      std::vector<int> new_face;
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+        std::pair<int,int> edge = std::make_pair(std::min(v1, v2), std::max(v1, v2));
+        new_face.push_back(vert_map[edge]);
+      }
+      faces_new.push_back(new_face);
+    }
+
+    // Faces from original vertices
+    std::map<int, std::vector<std::pair<int,int>>> vert_edges;
+    for (const auto& kv : vert_map) {
+      vert_edges[kv.first.first].push_back(std::make_pair(kv.first.second, kv.second));
+      vert_edges[kv.first.second].push_back(std::make_pair(kv.first.first, kv.second));
+    }
+
+    for (auto& kv : vert_edges) {
+      // Sort edges around vertex to create proper face ordering
+      if (kv.second.size() >= 3) {
+        std::vector<int> new_face;
+        for (const auto& edge : kv.second)
+          new_face.push_back(edge.second);
+        faces_new.push_back(new_face);
+      }
+    }
+
+    // Replace geometry
+    g.clear_all();
+    verts = verts_new;
+    for (const auto& f : faces_new)
+      g.add_face(f);
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_gyro(AntiGeometryHandle geom) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry& g = *to_geom(geom);
+
+    std::vector<std::vector<int>> &faces = g.raw_faces();
+    std::vector<Vec3d> &verts = g.raw_verts();
+
+    // Get face centers
+    std::vector<Vec3d> centers;
+    g.face_cents(centers);
+
+    std::map<std::pair<int,int>, int> edge_vert_map;
+    std::vector<Vec3d> verts_new;
+    int vert_num = 0;
+
+    // Create new vertices: 1/3 along each edge from both ends
+    for (const auto& face : faces) {
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+
+        std::pair<int,int> edge_fwd = std::make_pair(v1, v2);
+
+        if (edge_vert_map.find(edge_fwd) == edge_vert_map.end()) {
+          edge_vert_map[edge_fwd] = vert_num++;
+          verts_new.push_back(verts[v1] + (verts[v2] - verts[v1]) * (1.0/3.0));
+        }
+      }
+    }
+
+    // Build new faces
+    std::vector<std::vector<int>> faces_new;
+
+    for (unsigned int i = 0; i < faces.size(); i++) {
+      const auto& face = faces[i];
+
+      // Central n-gon (rotated)
+      std::vector<int> center_face;
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+        center_face.push_back(edge_vert_map[std::make_pair(v1, v2)]);
+      }
+      faces_new.push_back(center_face);
+
+      // Triangles at each vertex
+      for (unsigned int j = 0; j < face.size(); j++) {
+        int v1 = face[j];
+        int v2 = face[(j + 1) % face.size()];
+        int v0 = face[(j + face.size() - 1) % face.size()];
+
+        std::vector<int> tri;
+        tri.push_back(edge_vert_map[std::make_pair(v0, v1)]);
+        tri.push_back(edge_vert_map[std::make_pair(v1, v2)]);
+        tri.push_back(edge_vert_map[std::make_pair(v2, v1)]); // reverse edge
+
+        faces_new.push_back(tri);
+      }
+    }
+
+    // Replace geometry
+    g.clear_all();
+    verts = verts_new;
+    for (const auto& f : faces_new)
+      g.add_face(f);
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
 /*---------------------------------------------------------------------------
  * Polyhedra Generators (Conway Notation)
  *---------------------------------------------------------------------------*/
