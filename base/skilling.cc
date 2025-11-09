@@ -27,11 +27,17 @@
 */
 
 #include "coloring.h"
+#include "platform_compat.h"
 #include "geometryutils.h"
+#include "platform_compat.h"
 #include "mathutils.h"
+#include "platform_compat.h"
 #include "private_std_polys.h"
+#include "platform_compat.h"
 #include "random.h"
+#include "platform_compat.h"
 #include "utils.h"
+#include "platform_compat.h"
 
 #include <algorithm>
 #include <cmath>

@@ -37,8 +37,8 @@ namespace anti {
 
 template <class T> class ElemProps {
 private:
-  // Element index to element propert mapping
-  std::map<int, T> ElemProps;
+  // Element index to element property mapping
+  std::map<int, T> props;
 
 public:
   /// Set an element property.
@@ -109,32 +109,32 @@ public:
 template <class T> void ElemProps<T>::set(int idx, const T &prop)
 {
   if (prop.is_set())
-    ElemProps[idx] = prop;
+    props[idx] = prop;
   else
     del(idx);
 }
 
-template <class T> void ElemProps<T>::del(int idx) { ElemProps.erase(idx); }
+template <class T> void ElemProps<T>::del(int idx) { props.erase(idx); }
 
 template <class T> T ElemProps<T>::get(int idx) const
 {
-  auto mi = ElemProps.find(idx);
-  if (mi != ElemProps.end())
+  auto mi = props.find(idx);
+  if (mi != props.end())
     return mi->second;
   else
     return T();
 }
 
-template <class T> void ElemProps<T>::clear() { ElemProps.clear(); }
+template <class T> void ElemProps<T>::clear() { props.clear(); }
 
 template <class T> const std::map<int, T> &ElemProps<T>::get_properties() const
 {
-  return ElemProps;
+  return props;
 }
 
 template <class T> std::map<int, T> &ElemProps<T>::get_properties()
 {
-  return ElemProps;
+  return props;
 }
 
 template <class T> void ElemProps<T>::remap(const std::map<int, int> &chg_map)
@@ -144,13 +144,13 @@ template <class T> void ElemProps<T>::remap(const std::map<int, int> &chg_map)
   std::map<int, T> new_props;
   for (const auto &kp : chg_map) {
     if (kp.second != -1) {
-      auto cmi = ElemProps.find(kp.first);
-      if (cmi != ElemProps.end())
+      auto cmi = props.find(kp.first);
+      if (cmi != props.end())
         new_props[kp.second] = cmi->second;
     }
   }
 
-  ElemProps = new_props;
+  props = new_props;
 }
 
 template <class T>

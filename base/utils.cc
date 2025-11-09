@@ -28,9 +28,11 @@
 */
 
 #include "utils.h"
+#include "platform_compat.h"
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
+#include "platform_compat.h"
 #endif
 
 #include <cctype>
