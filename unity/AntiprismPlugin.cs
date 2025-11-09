@@ -32,6 +32,116 @@ namespace Antiprism
     }
 
     /// <summary>
+    /// Available polyhedron types that can be generated
+    /// </summary>
+    public enum PolyhedronType
+    {
+        // Platonic Solids
+        Tetrahedron,
+        Cube,
+        Octahedron,
+        Dodecahedron,
+        Icosahedron,
+
+        // Archimedean Solids (truncated forms)
+        TruncatedTetrahedron,
+        TruncatedCube,
+        TruncatedOctahedron,
+        TruncatedDodecahedron,
+        TruncatedIcosahedron,
+
+        // Archimedean Solids (other)
+        Cuboctahedron,
+        Icosidodecahedron,
+        Rhombicuboctahedron,
+        TruncatedCuboctahedron,
+        Rhombicosidodecahedron,
+        TruncatedIcosidodecahedron,
+        SnubCube,
+        SnubDodecahedron,
+
+        // Catalan Solids (duals of Archimedean)
+        RhombicDodecahedron,
+        RhombicTriacontahedron,
+
+        // Prisms
+        Prism3,
+        Prism4,
+        Prism5,
+        Prism6,
+        Prism7,
+        Prism8,
+        Prism9,
+        Prism10,
+        Prism12,
+
+        // Antiprisms
+        Antiprism3,
+        Antiprism4,
+        Antiprism5,
+        Antiprism6,
+        Antiprism8,
+        Antiprism10,
+
+        // Pyramids
+        TriangularPyramid,
+        SquarePyramid,
+        PentagonalPyramid,
+        HexagonalPyramid,
+
+        // Dipyramids (Bipyramids)
+        TriangularDipyramid,
+        SquareDipyramid,
+        PentagonalDipyramid,
+        HexagonalDipyramid,
+        OctagonalDipyramid,
+        DecagonalDipyramid,
+
+        // Kepler-Poinsot Polyhedra (stellated regular)
+        SmallStellatedDodecahedron,
+        GreatDodecahedron,
+        GreatStellatedDodecahedron,
+        GreatIcosahedron,
+
+        // Geodesic Spheres (icosahedral subdivision)
+        GeodesicIco2,
+        GeodesicIco3,
+        GeodesicIco4,
+
+        // Johnson Solids (selected interesting ones)
+        TriangularCupola,
+        SquareCupola,
+        PentagonalCupola,
+        PentagonalRotunda,
+        ElongatedSquarePyramid,
+        GyroelongatedSquarePyramid,
+        Gyrobifastigium
+    }
+
+    /// <summary>
+    /// Conway polyhedron notation operators for modifying polyhedra
+    /// </summary>
+    public enum ModifierType
+    {
+        None,
+        Dual,
+        Truncate,
+        Kis,
+        Ambo,
+        Gyro,
+        Join,
+        Needle,
+        Zip,
+        Subdivide,
+        Expand,
+        Meta,
+        Bevel,
+        Snub,
+        Ortho,
+        ConvexHull
+    }
+
+    /// <summary>
     /// Unity wrapper for the Antiprism polyhedra library
     /// </summary>
     public class AntiprismPlugin
@@ -48,6 +158,104 @@ namespace Antiprism
         #else
         internal const string LIBRARY_NAME = "antiprism";
         #endif
+
+        /*-----------------------------------------------------------------------
+         * Public Utility Methods
+         *-----------------------------------------------------------------------*/
+
+        /// <summary>
+        /// Get the Antiprism resource name for a given polyhedron type
+        /// </summary>
+        /// <param name="type">The polyhedron type</param>
+        /// <returns>Resource name string for use with anti_geometry_read_resource()</returns>
+        public static string GetResourceName(PolyhedronType type)
+        {
+            switch (type)
+            {
+                // Platonic Solids
+                case PolyhedronType.Tetrahedron: return "tet";
+                case PolyhedronType.Cube: return "cube";
+                case PolyhedronType.Octahedron: return "oct";
+                case PolyhedronType.Dodecahedron: return "dodecahedron";
+                case PolyhedronType.Icosahedron: return "ico";
+
+                // Archimedean Solids (truncated forms)
+                case PolyhedronType.TruncatedTetrahedron: return "tr_tet";
+                case PolyhedronType.TruncatedCube: return "tr_cube";
+                case PolyhedronType.TruncatedOctahedron: return "tr_oct";
+                case PolyhedronType.TruncatedDodecahedron: return "tr_dod";
+                case PolyhedronType.TruncatedIcosahedron: return "tr_ico";
+
+                // Archimedean Solids (other)
+                case PolyhedronType.Cuboctahedron: return "cubo";
+                case PolyhedronType.Icosidodecahedron: return "id";
+                case PolyhedronType.Rhombicuboctahedron: return "rhombicubo";
+                case PolyhedronType.TruncatedCuboctahedron: return "tr_cubo";
+                case PolyhedronType.Rhombicosidodecahedron: return "rhombicosid";
+                case PolyhedronType.TruncatedIcosidodecahedron: return "tr_icosid";
+                case PolyhedronType.SnubCube: return "sn_cube";
+                case PolyhedronType.SnubDodecahedron: return "sn_dod";
+
+                // Catalan Solids (duals of Archimedean)
+                case PolyhedronType.RhombicDodecahedron: return "rhombic_dodecahedron";
+                case PolyhedronType.RhombicTriacontahedron: return "rhombic_triacontahedron";
+
+                // Prisms
+                case PolyhedronType.Prism3: return "pri3";
+                case PolyhedronType.Prism4: return "pri4";
+                case PolyhedronType.Prism5: return "pri5";
+                case PolyhedronType.Prism6: return "pri6";
+                case PolyhedronType.Prism7: return "pri7";
+                case PolyhedronType.Prism8: return "pri8";
+                case PolyhedronType.Prism9: return "pri9";
+                case PolyhedronType.Prism10: return "pri10";
+                case PolyhedronType.Prism12: return "pri12";
+
+                // Antiprisms
+                case PolyhedronType.Antiprism3: return "ant3";
+                case PolyhedronType.Antiprism4: return "ant4";
+                case PolyhedronType.Antiprism5: return "ant5";
+                case PolyhedronType.Antiprism6: return "ant6";
+                case PolyhedronType.Antiprism8: return "ant8";
+                case PolyhedronType.Antiprism10: return "ant10";
+
+                // Pyramids
+                case PolyhedronType.TriangularPyramid: return "pyr3";
+                case PolyhedronType.SquarePyramid: return "pyr4";
+                case PolyhedronType.PentagonalPyramid: return "pyr5";
+                case PolyhedronType.HexagonalPyramid: return "pyr6";
+
+                // Dipyramids (Bipyramids)
+                case PolyhedronType.TriangularDipyramid: return "dip3";
+                case PolyhedronType.SquareDipyramid: return "dip4";
+                case PolyhedronType.PentagonalDipyramid: return "dip5";
+                case PolyhedronType.HexagonalDipyramid: return "dip6";
+                case PolyhedronType.OctagonalDipyramid: return "dip8";
+                case PolyhedronType.DecagonalDipyramid: return "dip10";
+
+                // Kepler-Poinsot Polyhedra (stellated regular)
+                case PolyhedronType.SmallStellatedDodecahedron: return "u34";
+                case PolyhedronType.GreatDodecahedron: return "u35";
+                case PolyhedronType.GreatStellatedDodecahedron: return "u52";
+                case PolyhedronType.GreatIcosahedron: return "u53";
+
+                // Geodesic Spheres (icosahedral subdivision)
+                case PolyhedronType.GeodesicIco2: return "geo_i_2";
+                case PolyhedronType.GeodesicIco3: return "geo_i_3";
+                case PolyhedronType.GeodesicIco4: return "geo_i_4";
+
+                // Johnson Solids (selected interesting ones)
+                case PolyhedronType.TriangularCupola: return "j3";
+                case PolyhedronType.SquareCupola: return "j4";
+                case PolyhedronType.PentagonalCupola: return "j5";
+                case PolyhedronType.PentagonalRotunda: return "j6";
+                case PolyhedronType.ElongatedSquarePyramid: return "j8";
+                case PolyhedronType.GyroelongatedSquarePyramid: return "j10";
+                case PolyhedronType.Gyrobifastigium: return "j26";
+
+                default: return "ico";
+            }
+        }
 
         /*-----------------------------------------------------------------------
          * Native API Imports
