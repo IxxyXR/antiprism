@@ -1364,14 +1364,14 @@ ANTIPRISM_API AntiStatus anti_geometry_get_face_color(AntiGeometryHandle geom,
     return ANTI_ERROR_INVALID_HANDLE;
 
   try {
-    Geometry* g = to_geom(geom);
+    Geometry* geo = to_geom(geom);
 
     // Check if face index is valid
-    if (face_idx < 0 || face_idx >= (int)g->faces().size())
+    if (face_idx < 0 || face_idx >= (int)geo->faces().size())
       return ANTI_ERROR_INVALID_INDEX;
 
     // Get face color - FACES = 2 in const.h
-    Color col = g->get_cols()[2].get(face_idx);
+    Color col = geo->get_cols()[2].get(face_idx);
 
     // Check if color is set
     if (!col.is_set())
