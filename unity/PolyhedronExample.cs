@@ -193,6 +193,28 @@ public class PolyhedronExample : MonoBehaviour
 
     void OnValidate()
     {
+        // Validate and normalize symmetroSym to prevent crashes
+        symmetroSym = char.ToUpper(symmetroSym);
+        if (symmetroSym != 'T' && symmetroSym != 'O' && symmetroSym != 'I')
+        {
+            Debug.LogWarning($"Invalid symmetry type '{symmetroSym}' - resetting to 'O' (octahedral)");
+            symmetroSym = 'O';
+        }
+
+        // Validate multipliers (at least one must be non-zero, at most two can be non-zero)
+        int numMultipliers = (symmetroMult0 > 0 ? 1 : 0) + (symmetroMult1 > 0 ? 1 : 0) + (symmetroMult2 > 0 ? 1 : 0);
+        if (numMultipliers == 0)
+        {
+            Debug.LogWarning("All symmetro multipliers are zero - setting mult0=1, mult1=1");
+            symmetroMult0 = 1;
+            symmetroMult1 = 1;
+        }
+        else if (numMultipliers == 3)
+        {
+            Debug.LogWarning("All three symmetro multipliers are non-zero (invalid) - setting mult2=0");
+            symmetroMult2 = 0;
+        }
+
         // Regenerate when values change in the inspector
         // This works in both Edit mode and Play mode!
         if (meshFilter == null)
@@ -304,8 +326,32 @@ public class PolyhedronExample : MonoBehaviour
                 return Geometry.CreateGeodesic(geodesicFrequency, geodesicMethod);
 
             case PolyhedronType.Symmetrohedra:
-                return Geometry.CreateSymmetroKaplanHart(symmetroSym, symmetroMult0, symmetroMult1,
-                                                         symmetroMult2);
+                // Validate symmetry type
+                char validSym = char.ToUpper(symmetroSym);
+                if (validSym != 'T' && validSym != 'O' && validSym != 'I')
+                {
+                    Debug.LogError($"Invalid symmetry type '{symmetroSym}' - must be T, O, or I. Using O.");
+                    validSym = 'O';
+                }
+
+                // Validate multipliers
+                int m0 = Mathf.Max(0, symmetroMult0);
+                int m1 = Mathf.Max(0, symmetroMult1);
+                int m2 = Mathf.Max(0, symmetroMult2);
+                int numMult = (m0 > 0 ? 1 : 0) + (m1 > 0 ? 1 : 0) + (m2 > 0 ? 1 : 0);
+
+                if (numMult == 0)
+                {
+                    Debug.LogError("All symmetro multipliers are zero - using default (1,1,0)");
+                    m0 = 1; m1 = 1; m2 = 0;
+                }
+                else if (numMult == 3)
+                {
+                    Debug.LogError("All three symmetro multipliers are non-zero (invalid) - setting mult2=0");
+                    m2 = 0;
+                }
+
+                return Geometry.CreateSymmetroKaplanHart(validSym, m0, m1, m2);
 
             case PolyhedronType.JohnsonSolid:
                 {
