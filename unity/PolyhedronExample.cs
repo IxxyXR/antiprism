@@ -7,7 +7,7 @@
    Usage:
    1. Attach this script to a GameObject in your Unity scene
    2. Select polyhedron type from dropdown
-   3. Adjust parameters in the inspector
+   3. Adjust parameters in the inspector (for parameterized types)
    4. Changes update automatically in Edit mode!
 */
 
@@ -24,6 +24,38 @@ public class PolyhedronExample : MonoBehaviour
     [Header("Polyhedron Generator")]
     [Tooltip("Type of polyhedron to display")]
     public PolyhedronType polyhedronType = PolyhedronType.Icosahedron;
+
+    [Header("Parameterized Type Settings")]
+    [Tooltip("Number of sides for Prism/Antiprism/Pyramid/Dipyramid (n >= 3) or Cupola (n >= 2)")]
+    [Range(2, 20)]
+    public int sides = 5;
+
+    [Tooltip("Geodesic subdivision frequency (1-10 recommended)")]
+    [Range(1, 10)]
+    public int geodesicFrequency = 2;
+
+    [Tooltip("Geodesic base polyhedron")]
+    public GeodesicMethod geodesicMethod = GeodesicMethod.Icosahedron;
+
+    [Header("Symmetrohedra Settings (Kaplan-Hart notation)")]
+    [Tooltip("Symmetry: T (tetrahedral), O (octahedral), I (icosahedral)")]
+    public char symmetroSym = 'T';
+
+    [Tooltip("First Schläfli parameter (p in {p,q})")]
+    [Range(2, 5)]
+    public int symmetroP = 3;
+
+    [Tooltip("Second Schläfli parameter (q in {p,q})")]
+    [Range(2, 5)]
+    public int symmetroQ = 3;
+
+    [Tooltip("Multiplier for first axis (0 = no polygon on this axis)")]
+    [Range(0, 10)]
+    public int symmetroL = 2;
+
+    [Tooltip("Multiplier for second axis (0 = no polygon on this axis)")]
+    [Range(0, 10)]
+    public int symmetroM = 3;
 
     [Header("Modifiers")]
     [Tooltip("Apply a modifier operation")]
@@ -184,36 +216,71 @@ public class PolyhedronExample : MonoBehaviour
         if (mesh == null)
             return;
 
-        using (var geom = new Geometry())
+        try
         {
-            // Load the base polyhedron
-            string resourceName = AntiprismPlugin.GetResourceName(polyhedronType);
-            Status status = geom.LoadResource(resourceName);
-            if (status != Status.OK)
+            using (var geom = CreateBasePolyhedron())
             {
-                Debug.LogError($"Failed to load polyhedron '{resourceName}': {status}");
-                return;
+                // Apply modifier
+                ApplyModifier(geom);
+
+                // Normalize to unit sphere
+                geom.Unitize();
+
+                // Scale
+                if (scale != 1.0f)
+                {
+                    geom.Scale(scale);
+                }
+
+                // Orient faces consistently
+                geom.Orient();
+
+                // Apply to Unity mesh with flat or smooth shading
+                geom.ApplyToMesh(mesh, flatShading);
+
+                Debug.Log($"Generated {polyhedronType} ({modifier}): {geom.VertexCount} vertices, {geom.FaceCount} faces");
             }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to generate polyhedron: {e.Message}");
+        }
+    }
 
-            // Apply modifier
-            ApplyModifier(geom);
+    /// <summary>
+    /// Create the base polyhedron based on type and parameters
+    /// </summary>
+    Geometry CreateBasePolyhedron()
+    {
+        // Check if it's a parameterized type
+        switch (polyhedronType)
+        {
+            case PolyhedronType.Prism:
+                return Geometry.CreatePrism(sides);
 
-            // Normalize to unit sphere
-            geom.Unitize();
+            case PolyhedronType.Antiprism:
+                return Geometry.CreateAntiprism(sides);
 
-            // Scale
-            if (scale != 1.0f)
-            {
-                geom.Scale(scale);
-            }
+            case PolyhedronType.Pyramid:
+                return Geometry.CreatePyramid(sides);
 
-            // Orient faces consistently
-            geom.Orient();
+            case PolyhedronType.Dipyramid:
+                return Geometry.CreateDipyramid(sides);
 
-            // Apply to Unity mesh with flat or smooth shading
-            geom.ApplyToMesh(mesh, flatShading);
+            case PolyhedronType.Cupola:
+                return Geometry.CreateCupola(sides);
 
-            Debug.Log($"Generated {polyhedronType} ({modifier}): {geom.VertexCount} vertices, {geom.FaceCount} faces");
+            default:
+                // Non-parameterized type - load from resource
+                var geom = new Geometry();
+                string resourceName = AntiprismPlugin.GetResourceName(polyhedronType);
+                Status status = geom.LoadResource(resourceName);
+                if (status != Status.OK)
+                {
+                    geom.Dispose();
+                    throw new System.Exception($"Failed to load polyhedron '{resourceName}': {status}");
+                }
+                return geom;
         }
     }
 
@@ -352,6 +419,15 @@ public class PolyhedronExample : MonoBehaviour
     public void SetPolyhedronType(PolyhedronType type)
     {
         polyhedronType = type;
+        GeneratePolyhedron();
+    }
+
+    /// <summary>
+    /// Set the number of sides for parameterized types
+    /// </summary>
+    public void SetSides(int n)
+    {
+        sides = Mathf.Max(2, n);
         GeneratePolyhedron();
     }
 
