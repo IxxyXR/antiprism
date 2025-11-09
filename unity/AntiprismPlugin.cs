@@ -592,13 +592,9 @@ namespace Antiprism
 
             for (int i = 0; i < faceCount; i++)
             {
-                int faceSize = anti_geometry_face_size(handle, i);
+                int faceSize = anti_geometry_face_num_verts(handle, i);
                 faces[i] = new int[faceSize];
-
-                for (int j = 0; j < faceSize; j++)
-                {
-                    faces[i][j] = anti_geometry_face_vert(handle, i, j);
-                }
+                anti_geometry_get_face(handle, i, faces[i], faceSize);
             }
 
             return faces;
@@ -942,10 +938,10 @@ namespace Antiprism
             out double x, out double y, out double z);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern int anti_geometry_face_size(IntPtr geom, int faceIdx);
+        private static extern int anti_geometry_face_num_verts(IntPtr geom, int faceIdx);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern int anti_geometry_face_vert(IntPtr geom, int faceIdx, int vertIdx);
+        private static extern int anti_geometry_get_face(IntPtr geom, int faceIdx, int[] indices, int maxIndices);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_get_all_faces(IntPtr geom, int[] buffer, int bufferSize);
