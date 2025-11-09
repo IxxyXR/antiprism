@@ -18,8 +18,8 @@
 
 **Excluded:** Viewers (antiview), format converters (obj2off, off2obj, off2pov, off2vrml, off2dae, off2crds), and text output tools (rep_print).
 
-#### Phase 1: Critical Polyhedra Generators (NOT YET INTEGRATED)
-- [ ] **symmetro** - Symmetrohedra using Kaplan-Hart notation (T,O,I symmetries with l,m,n multipliers)
+#### Phase 1: Critical Polyhedra Generators
+- [x] **symmetro** - Symmetrohedra using Kaplan-Hart notation (T,O,I symmetries with l,m,n multipliers) - COMPLETED
 - [ ] **stellate** - Stellation operations on polyhedra
 - [ ] **canonical** - Canonical/normalized forms (planarize, center, unitize)
 - [ ] **wythoff** - Wythoff construction (may overlap with uniform resources)
@@ -54,7 +54,7 @@
 - [ ] **off_report** - Generate reports on polyhedra
 - [ ] **off_util** - General utilities
 
-**Total standalone programs: 46** | **Currently integrated: ~8** | **Remaining: ~38**
+**Total standalone programs: 46** | **Currently integrated: ~9** | **Remaining: ~37**
 
 ### Other Major Gaps - Base Library Features Not Yet Exposed
 
