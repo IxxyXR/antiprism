@@ -743,6 +743,69 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Create a symmetrohedron using Kaplan-Hart notation
+        /// </summary>
+        /// <param name="sym">Symmetry type: 'T' (tetrahedral), 'O' (octahedral), 'I' (icosahedral)</param>
+        /// <param name="p">First Schläfli parameter</param>
+        /// <param name="q">Second Schläfli parameter</param>
+        /// <param name="l">Multiplier for first axis (0 = no polygon on this axis)</param>
+        /// <param name="m">Multiplier for second axis (0 = no polygon on this axis)</param>
+        /// <param name="symId">Symmetry ID number (typically 1)</param>
+        /// <returns>New Geometry containing the symmetrohedron</returns>
+        public static Geometry CreateSymmetroKaplanHart(char sym, int p, int q, int l, int m, int symId = 1)
+        {
+            if (sym != 'T' && sym != 'O' && sym != 'I')
+                throw new ArgumentException("Symmetry must be 'T', 'O', or 'I'");
+
+            if (p < 2 || q < 2)
+                throw new ArgumentException("Schläfli parameters must be >= 2");
+
+            if (l < 0 || m < 0)
+                throw new ArgumentException("Multipliers must be >= 0");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_symmetro_kaplan_hart(geom.handle, sym, p, q, l, m, symId);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create symmetrohedron: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create a symmetrohedron with advanced parameters
+        /// </summary>
+        /// <param name="sym">Symmetry type: 'T', 'O', 'I', 'D', 'S', 'C', 'V', 'H'</param>
+        /// <param name="p">First Schläfli parameter</param>
+        /// <param name="q">Second Schläfli parameter</param>
+        /// <param name="l">Multiplier for first axis</param>
+        /// <param name="m">Multiplier for second axis</param>
+        /// <param name="d0">D value for first axis (default 1)</param>
+        /// <param name="d1">D value for second axis (default 1)</param>
+        /// <param name="rotation">Rotation angle in degrees (default 0)</param>
+        /// <param name="symId">Symmetry ID number (typically 1)</param>
+        /// <returns>New Geometry containing the symmetrohedron</returns>
+        public static Geometry CreateSymmetroAdvanced(char sym, int p, int q, int l, int m,
+            int d0 = 1, int d1 = 1, double rotation = 0.0, int symId = 1)
+        {
+            if (sym != 'T' && sym != 'O' && sym != 'I' && sym != 'D' &&
+                sym != 'S' && sym != 'C' && sym != 'V' && sym != 'H')
+                throw new ArgumentException("Invalid symmetry type");
+
+            if (p < 2 || q < 2)
+                throw new ArgumentException("Schläfli parameters must be >= 2");
+
+            if (l < 0 || m < 0)
+                throw new ArgumentException("Multipliers must be >= 0");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_symmetro_advanced(geom.handle, sym, p, q, l, m, d0, d1, rotation, symId);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create symmetrohedron: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
         /// Load a built-in polyhedron (e.g., "cube", "tet", "ico", "dodec")
         /// </summary>
         public Status LoadResource(string name)
@@ -1341,5 +1404,15 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_make_cupola(IntPtr geom, int n);
+
+        // Symmetrohedra generators
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_symmetro_kaplan_hart(
+            IntPtr geom, char sym, int p, int q, int l, int m, int sym_id);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_symmetro_advanced(
+            IntPtr geom, char sym, int p, int q, int l, int m,
+            int d0, int d1, double rotation, int sym_id);
     }
 }

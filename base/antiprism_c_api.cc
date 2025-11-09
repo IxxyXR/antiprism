@@ -24,10 +24,12 @@
 
 #include "antiprism_c_api.h"
 #include "antiprism.h"
+#include "symmetro_wrapper.h"
 
 #include <cstring>
 #include <cstdlib>
 #include <sstream>
+#include <cmath>
 
 using namespace anti;
 
@@ -1163,6 +1165,156 @@ ANTIPRISM_API AntiStatus anti_make_cupola(AntiGeometryHandle geom, int n) {
     Polygon pgon(n, 1, Polygon::cupola, Polygon::sub_default);
     Status stat = pgon.make_poly(*to_geom(geom));
     return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+/*---------------------------------------------------------------------------
+ * Symmetrohedra Generators
+ *---------------------------------------------------------------------------*/
+
+ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
+    AntiGeometryHandle geom, char sym, int p, int q, int l, int m, int sym_id) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate symmetry type
+  if (sym != 'T' && sym != 'O' && sym != 'I')
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate parameters
+  if (p < 2 || q < 2 || l < 0 || m < 0 || sym_id < 1)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Create symmetro object
+    symmetro symm;
+
+    // Set symmetry
+    symm.setSym(sym, p, q, 0, sym_id);
+
+    // Set multipliers for each axis
+    symm.setMult(0, l);
+    symm.setMult(1, m);
+
+    // Fill symmetry vectors (Kaplan-Hart mode)
+    std::string error_msg;
+    int err = symm.fill_sym_vec('k', &error_msg);
+    if (err != 0) {
+      return ANTI_ERROR_UNKNOWN;
+    }
+
+    // Calculate polygons
+    double angle_between_axes = NAN;  // Let it calculate automatically
+    std::vector<Geometry> pgeoms = symm.calc_polygons(
+        'k',      // mode: Kaplan-Hart
+        0.0,      // rotation
+        0.0,      // rotation_multiplier
+        false,    // add_pi
+        false,    // swap_axes
+        0.0,      // offset
+        false,    // verbose
+        angle_between_axes,
+        &error_msg
+    );
+
+    // Check if generation failed
+    if (!error_msg.empty()) {
+      return ANTI_ERROR_UNKNOWN;
+    }
+
+    // Combine the two generated polygons into the output geometry
+    Geometry* out_geom = to_geom(geom);
+    out_geom->clear_all();
+
+    for (const auto& pg : pgeoms) {
+      if (pg.verts().size() > 0) {
+        out_geom->append(pg);
+      }
+    }
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_symmetro_advanced(
+    AntiGeometryHandle geom, char sym, int p, int q, int l, int m,
+    int d0, int d1, double rotation, int sym_id) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate symmetry type
+  if (sym != 'T' && sym != 'O' && sym != 'I' && sym != 'D' &&
+      sym != 'S' && sym != 'C' && sym != 'V' && sym != 'H')
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate parameters
+  if (p < 2 || q < 2 || l < 0 || m < 0 || sym_id < 1)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Create symmetro object
+    symmetro symm;
+
+    // Set symmetry
+    symm.setSym(sym, p, q, 0, sym_id);
+
+    // Set multipliers for each axis
+    symm.setMult(0, l);
+    symm.setMult(1, m);
+
+    // Set d values
+    symm.setD(0, d0);
+    symm.setD(1, d1);
+
+    // Determine mode based on symmetry type
+    char mode = 'k';  // Default to Kaplan-Hart
+    if (sym == 'S' || sym == 'C' || sym == 'V' || sym == 'H') {
+      mode = 'c';  // s/c symmetry mode
+    }
+
+    // Fill symmetry vectors
+    std::string error_msg;
+    int err = symm.fill_sym_vec(mode, &error_msg);
+    if (err != 0) {
+      return ANTI_ERROR_UNKNOWN;
+    }
+
+    // Calculate polygons
+    double angle_between_axes = NAN;  // Let it calculate automatically
+    std::vector<Geometry> pgeoms = symm.calc_polygons(
+        mode,     // mode
+        rotation, // rotation
+        0.0,      // rotation_multiplier
+        false,    // add_pi
+        false,    // swap_axes
+        0.0,      // offset
+        false,    // verbose
+        angle_between_axes,
+        &error_msg
+    );
+
+    // Check if generation failed
+    if (!error_msg.empty()) {
+      return ANTI_ERROR_UNKNOWN;
+    }
+
+    // Combine the two generated polygons into the output geometry
+    Geometry* out_geom = to_geom(geom);
+    out_geom->clear_all();
+
+    for (const auto& pg : pgeoms) {
+      if (pg.verts().size() > 0) {
+        out_geom->append(pg);
+      }
+    }
+
+    return ANTI_OK;
   }
   catch (...) {
     return ANTI_ERROR_UNKNOWN;

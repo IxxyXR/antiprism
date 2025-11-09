@@ -462,6 +462,38 @@ ANTIPRISM_API AntiStatus anti_make_dipyramid(AntiGeometryHandle geom, int n);
 ANTIPRISM_API AntiStatus anti_make_cupola(AntiGeometryHandle geom, int n);
 
 /*---------------------------------------------------------------------------
+ * Symmetrohedra Generators (Kaplan-Hart notation)
+ *---------------------------------------------------------------------------*/
+
+/** Generate a symmetrohedron using Kaplan-Hart notation
+ * @param geom Handle to geometry object
+ * @param sym Symmetry type: 'T' (tetrahedral), 'O' (octahedral), 'I' (icosahedral)
+ * @param p First Schläfli parameter
+ * @param q Second Schläfli parameter
+ * @param l Multiplier for first axis (0 = no polygon on this axis)
+ * @param m Multiplier for second axis (0 = no polygon on this axis)
+ * @param sym_id Symmetry ID number (typically 1)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
+    AntiGeometryHandle geom, char sym, int p, int q, int l, int m, int sym_id);
+
+/** Generate a symmetrohedron with advanced parameters
+ * @param geom Handle to geometry object
+ * @param sym Symmetry type: 'T', 'O', 'I', 'D', 'S', 'C', 'V', 'H'
+ * @param p First Schläfli parameter
+ * @param q Second Schläfli parameter
+ * @param l Multiplier for first axis
+ * @param m Multiplier for second axis
+ * @param d0 D value for first axis (default 1)
+ * @param d1 D value for second axis (default 1)
+ * @param rotation Rotation angle in degrees (default 0)
+ * @param sym_id Symmetry ID number (typically 1)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_symmetro_advanced(
+    AntiGeometryHandle geom, char sym, int p, int q, int l, int m,
+    int d0, int d1, double rotation, int sym_id);
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 
