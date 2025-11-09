@@ -734,6 +734,16 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Canonicalize geometry (adjust vertices for more uniform edge lengths)
+        /// </summary>
+        /// <param name="numIters">Maximum number of iterations (0 for default 1000)</param>
+        public Status Canonicalize(int numIters = 0)
+        {
+            CheckDisposed();
+            return anti_geometry_canonicalize(handle, numIters);
+        }
+
+        /// <summary>
         /// Apply convex hull
         /// </summary>
         public Status ConvexHull()
@@ -918,6 +928,9 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_orient(IntPtr geom);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_canonicalize(IntPtr geom, int num_iters);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_dual(IntPtr geom, double radius);

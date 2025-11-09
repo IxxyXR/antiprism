@@ -26,6 +26,7 @@
 #include "antiprism.h"
 #include "geometryutils.h"
 #include "symmetro_wrapper.h"
+#include "iteration.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -567,6 +568,40 @@ ANTIPRISM_API AntiStatus anti_geometry_orient_reverse(AntiGeometryHandle geom) {
 
   try {
     to_geom(geom)->orient_reverse();
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_geometry_canonicalize(AntiGeometryHandle geom,
+                                                     int num_iters) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry* g = to_geom(geom);
+
+    // Set up iteration control with sensible defaults
+    IterationControl it_ctrl;
+    if (num_iters <= 0)
+      num_iters = 1000;  // Default maximum iterations
+    it_ctrl.set_max_iters(num_iters);
+    it_ctrl.set_status_checks("1000");  // Check status every 1000 iterations
+
+    // Use default canonicalization parameters
+    // factor: edge adjustment factor (0.1 = 10%)
+    // factor_max: maximum edge adjustment (1.0 = 100%)
+    // initial_point_type: 'x' for centroid
+    // sym: empty symmetry (no symmetry constraint)
+    Symmetry sym;  // Empty symmetry
+
+    Status stat = make_canonical(*g, it_ctrl, 0.1, 1.0, 'x', sym);
+
+    if (stat.is_error())
+      return ANTI_ERROR_UNKNOWN;
+
     return ANTI_OK;
   }
   catch (...) {
