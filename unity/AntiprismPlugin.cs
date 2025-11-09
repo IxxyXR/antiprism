@@ -152,11 +152,7 @@ namespace Antiprism
         SnubSquareAntiprism,
         TriangularHebesphenorotunda,
 
-        // Uniform Polyhedra - Stellated Forms (U34-U41)
-        SmallStellatedDodecahedron,
-        GreatDodecahedron,
-        GreatStellatedDodecahedron,
-        GreatIcosahedron,
+        // Uniform Polyhedra - Additional Stellated Forms
         TruncatedGreatDodecahedron,
         RhombicosidodecahedronVariant,
         GreatIcosidodecahedron,
