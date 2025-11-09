@@ -1281,7 +1281,7 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
 
     // Set multipliers using the non-zero indices
     for (size_t i = 0; i < idx.size(); i++) {
-      symm.setMult(i, mults[idx[i]]);
+      symm.setMult(static_cast<int>(i), mults[idx[i]]);
     }
 
     // Fill symmetry vectors (Kaplan-Hart mode)
