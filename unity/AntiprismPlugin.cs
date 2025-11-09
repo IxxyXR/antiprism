@@ -107,15 +107,88 @@ namespace Antiprism
         GeodesicIco2,
         GeodesicIco3,
         GeodesicIco4,
+        GeodesicIco5,
+        GeodesicIco6,
+        GeodesicIco8,
 
-        // Johnson Solids (selected interesting ones)
+        // Johnson Solids - Cupolae and Rotundae (J3-J6)
         TriangularCupola,
         SquareCupola,
         PentagonalCupola,
         PentagonalRotunda,
+
+        // Johnson Solids - Elongated Pyramids (J7-J9)
+        ElongatedTriangularPyramid,
         ElongatedSquarePyramid,
+        ElongatedPentagonalPyramid,
+
+        // Johnson Solids - Gyroelongated Pyramids (J10-J12)
         GyroelongatedSquarePyramid,
-        Gyrobifastigium
+        GyroelongatedPentagonalPyramid,
+
+        // Johnson Solids - Bicupolae (J27-J35)
+        TriangularOrthobicupola,
+        SquareOrthobicupola,
+        SquareGyrobicupola,
+        PentagonalOrthobicupola,
+        PentagonalGyrobicupola,
+        PentagonalOrthocupolarotunda,
+        PentagonalGyrocupolarotunda,
+        PentagonalOrthobirotunda,
+        PentagonalGyrobirotunda,
+
+        // Johnson Solids - Elongated Cupolae (J18-J20)
+        ElongatedTriangularCupola,
+        ElongatedSquareCupola,
+        ElongatedPentagonalCupola,
+
+        // Johnson Solids - Elongated Bicupolae (J36-J38)
+        ElongatedTriangularOrthobicupola,
+        ElongatedSquareGyrobicupola,
+        ElongatedPentagonalOrthobicupola,
+
+        // Johnson Solids - Special (J26, J84, J92)
+        Gyrobifastigium,
+        SnubSquareAntiprism,
+        TriangularHebesphenorotunda,
+
+        // Uniform Polyhedra - Stellated Forms (U34-U41)
+        SmallStellatedDodecahedron,
+        GreatDodecahedron,
+        GreatStellatedDodecahedron,
+        GreatIcosahedron,
+        TruncatedGreatDodecahedron,
+        RhombicosidodecahedronVariant,
+        GreatIcosidodecahedron,
+        TruncatedGreatIcosahedron,
+
+        // Uniform Polyhedra - Special Forms
+        Tetrahemihexahedron,
+        Cubohemioctahedron,
+        GreatRhombicuboctahedron,
+        SmallRhombihexahedron,
+        GreatRhombihexahedron,
+
+        // Uniform Compounds (UC1-UC5 - most famous)
+        StellaOctangula,
+        CompoundCubeOctahedron,
+        CompoundDodecahedronIcosahedron,
+        CompoundTwoTetrahedra,
+        CompoundFiveTetrahedra,
+
+        // Wenninger Stellations (famous ones)
+        WenningerW1,
+        WenningerW2,
+        WenningerW3,
+        WenningerW9,
+        WenningerW20,
+        WenningerW22,
+
+        // Miscellaneous Special Polyhedra
+        RhombicEnneacontahedron,
+        RhombicHexecontahedron,
+        Csaszar,
+        Szilassi
     }
 
     /// <summary>
@@ -243,15 +316,84 @@ namespace Antiprism
                 case PolyhedronType.GeodesicIco2: return "geo_i_2";
                 case PolyhedronType.GeodesicIco3: return "geo_i_3";
                 case PolyhedronType.GeodesicIco4: return "geo_i_4";
+                case PolyhedronType.GeodesicIco5: return "geo_i_5";
+                case PolyhedronType.GeodesicIco6: return "geo_i_6";
+                case PolyhedronType.GeodesicIco8: return "geo_i_8";
 
-                // Johnson Solids (selected interesting ones)
+                // Johnson Solids - Cupolae and Rotundae (J3-J6)
                 case PolyhedronType.TriangularCupola: return "j3";
                 case PolyhedronType.SquareCupola: return "j4";
                 case PolyhedronType.PentagonalCupola: return "j5";
                 case PolyhedronType.PentagonalRotunda: return "j6";
+
+                // Johnson Solids - Elongated Pyramids (J7-J9)
+                case PolyhedronType.ElongatedTriangularPyramid: return "j7";
                 case PolyhedronType.ElongatedSquarePyramid: return "j8";
+                case PolyhedronType.ElongatedPentagonalPyramid: return "j9";
+
+                // Johnson Solids - Gyroelongated Pyramids (J10-J12)
                 case PolyhedronType.GyroelongatedSquarePyramid: return "j10";
+                case PolyhedronType.GyroelongatedPentagonalPyramid: return "j11";
+
+                // Johnson Solids - Bicupolae (J27-J35)
+                case PolyhedronType.TriangularOrthobicupola: return "j27";
+                case PolyhedronType.SquareOrthobicupola: return "j28";
+                case PolyhedronType.SquareGyrobicupola: return "j29";
+                case PolyhedronType.PentagonalOrthobicupola: return "j30";
+                case PolyhedronType.PentagonalGyrobicupola: return "j31";
+                case PolyhedronType.PentagonalOrthocupolarotunda: return "j32";
+                case PolyhedronType.PentagonalGyrocupolarotunda: return "j33";
+                case PolyhedronType.PentagonalOrthobirotunda: return "j34";
+                case PolyhedronType.PentagonalGyrobirotunda: return "j35";
+
+                // Johnson Solids - Elongated Cupolae (J18-J20)
+                case PolyhedronType.ElongatedTriangularCupola: return "j18";
+                case PolyhedronType.ElongatedSquareCupola: return "j19";
+                case PolyhedronType.ElongatedPentagonalCupola: return "j20";
+
+                // Johnson Solids - Elongated Bicupolae (J36-J38)
+                case PolyhedronType.ElongatedTriangularOrthobicupola: return "j36";
+                case PolyhedronType.ElongatedSquareGyrobicupola: return "j37";
+                case PolyhedronType.ElongatedPentagonalOrthobicupola: return "j38";
+
+                // Johnson Solids - Special (J26, J84, J92)
                 case PolyhedronType.Gyrobifastigium: return "j26";
+                case PolyhedronType.SnubSquareAntiprism: return "j85";
+                case PolyhedronType.TriangularHebesphenorotunda: return "j92";
+
+                // Uniform Polyhedra - Stellated Forms
+                case PolyhedronType.TruncatedGreatDodecahedron: return "u37";
+                case PolyhedronType.RhombicosidodecahedronVariant: return "u38";
+                case PolyhedronType.GreatIcosidodecahedron: return "u54";
+                case PolyhedronType.TruncatedGreatIcosahedron: return "u55";
+
+                // Uniform Polyhedra - Special Forms
+                case PolyhedronType.Tetrahemihexahedron: return "u4";
+                case PolyhedronType.Cubohemioctahedron: return "u15";
+                case PolyhedronType.GreatRhombicuboctahedron: return "u17";
+                case PolyhedronType.SmallRhombihexahedron: return "u18";
+                case PolyhedronType.GreatRhombihexahedron: return "u21";
+
+                // Uniform Compounds (UC1-UC5)
+                case PolyhedronType.StellaOctangula: return "uc1";
+                case PolyhedronType.CompoundCubeOctahedron: return "uc2";
+                case PolyhedronType.CompoundDodecahedronIcosahedron: return "uc3";
+                case PolyhedronType.CompoundTwoTetrahedra: return "uc4";
+                case PolyhedronType.CompoundFiveTetrahedra: return "uc5";
+
+                // Wenninger Stellations
+                case PolyhedronType.WenningerW1: return "w1";
+                case PolyhedronType.WenningerW2: return "w2";
+                case PolyhedronType.WenningerW3: return "w3";
+                case PolyhedronType.WenningerW9: return "w9";
+                case PolyhedronType.WenningerW20: return "w20";
+                case PolyhedronType.WenningerW22: return "w22";
+
+                // Miscellaneous Special Polyhedra
+                case PolyhedronType.RhombicEnneacontahedron: return "rhombic_enneacontahedron";
+                case PolyhedronType.RhombicHexecontahedron: return "rhombic_hexecontahedron";
+                case PolyhedronType.Csaszar: return "csaszar";
+                case PolyhedronType.Szilassi: return "szilassi";
 
                 default: return "ico";
             }
