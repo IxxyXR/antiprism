@@ -583,10 +583,11 @@ namespace Antiprism
         /// <summary>
         /// Gyro operation - rotate and subdivide faces creating pentagons
         /// </summary>
-        public Status Gyro()
+        /// <param name="n">Reserved for future use</param>
+        public Status Gyro(int n = 1)
         {
             CheckDisposed();
-            return anti_geometry_gyro(handle);
+            return anti_geometry_gyro(handle, n);
         }
 
         /// <summary>
@@ -620,38 +621,65 @@ namespace Antiprism
         /// <summary>
         /// Subdivide operation - subdivide each face into smaller quadrilateral faces
         /// </summary>
-        public Status Subdivide()
+        /// <param name="n">Reserved for future use</param>
+        /// <param name="m">Reserved for future use</param>
+        public Status Subdivide(int n = 2, int m = 0)
         {
             CheckDisposed();
-            return anti_geometry_subdivide(handle);
+            return anti_geometry_subdivide(handle, n, m);
         }
 
         /// <summary>
         /// Expand operation - double ambo (separates faces with squares)
         /// </summary>
-        public Status Expand()
+        /// <param name="n">Reserved for future use</param>
+        /// <param name="m">Reserved for future use</param>
+        public Status Expand(int n = 2, int m = 0)
         {
             CheckDisposed();
-            return anti_geometry_expand(handle);
+            return anti_geometry_expand(handle, n, m);
         }
 
         /// <summary>
         /// Meta operation - kis + dual (creates complex stellated forms)
         /// </summary>
-        public Status Meta()
+        /// <param name="n">Reserved for future use</param>
+        public Status Meta(int n = 2)
         {
             CheckDisposed();
-            return anti_geometry_meta(handle);
+            return anti_geometry_meta(handle, n);
         }
 
         /// <summary>
         /// Bevel operation - truncate + ambo (chamfers edges and vertices)
         /// </summary>
+        /// <param name="n">Reserved for future use</param>
         /// <param name="ratio">Truncation ratio</param>
-        public Status Bevel(double ratio = 0.3333)
+        public Status Bevel(int n = 2, double ratio = 0.3333)
         {
             CheckDisposed();
-            return anti_geometry_bevel(handle, ratio);
+            return anti_geometry_bevel(handle, n, ratio);
+        }
+
+        /// <summary>
+        /// Snub operation - dual + gyro (creates twisted forms)
+        /// </summary>
+        /// <param name="n">Reserved for future use</param>
+        public Status Snub(int n = 2)
+        {
+            CheckDisposed();
+            return anti_geometry_snub(handle, n);
+        }
+
+        /// <summary>
+        /// Ortho operation - join + join
+        /// </summary>
+        /// <param name="n">Reserved for future use</param>
+        /// <param name="m">Reserved for future use</param>
+        public Status Ortho(int n = 2, int m = 0)
+        {
+            CheckDisposed();
+            return anti_geometry_ortho(handle, n, m);
         }
 
         /// <summary>
@@ -822,7 +850,7 @@ namespace Antiprism
         private static extern Status anti_geometry_ambo(IntPtr geom);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_geometry_gyro(IntPtr geom);
+        private static extern Status anti_geometry_gyro(IntPtr geom, int n);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_join(IntPtr geom);
@@ -834,16 +862,22 @@ namespace Antiprism
         private static extern Status anti_geometry_zip(IntPtr geom);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_geometry_subdivide(IntPtr geom);
+        private static extern Status anti_geometry_subdivide(IntPtr geom, int n, int m);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_geometry_expand(IntPtr geom);
+        private static extern Status anti_geometry_expand(IntPtr geom, int n, int m);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_geometry_meta(IntPtr geom);
+        private static extern Status anti_geometry_meta(IntPtr geom, int n);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_geometry_bevel(IntPtr geom, double ratio);
+        private static extern Status anti_geometry_bevel(IntPtr geom, int n, double ratio);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_snub(IntPtr geom, int n);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_ortho(IntPtr geom, int n, int m);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_get_vertex_normals(IntPtr geom, double[] normals, int max_verts);

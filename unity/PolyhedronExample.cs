@@ -64,6 +64,8 @@ public class PolyhedronExample : MonoBehaviour
         Expand,
         Meta,
         Bevel,
+        Snub,
+        Ortho,
         ConvexHull
     }
 
@@ -388,6 +390,20 @@ public class PolyhedronExample : MonoBehaviour
                 Status bevelStatus = geom.Bevel(truncateRatio);
                 if (bevelStatus != Status.OK)
                     Debug.LogWarning($"Bevel operation failed: {bevelStatus}");
+                break;
+
+            case ModifierType.Snub:
+                // Dual + gyro (creates twisted form)
+                Status snubStatus = geom.Snub();
+                if (snubStatus != Status.OK)
+                    Debug.LogWarning($"Snub operation failed: {snubStatus}");
+                break;
+
+            case ModifierType.Ortho:
+                // Join + join (double join operation)
+                Status orthoStatus = geom.Ortho();
+                if (orthoStatus != Status.OK)
+                    Debug.LogWarning($"Ortho operation failed: {orthoStatus}");
                 break;
 
             case ModifierType.ConvexHull:
