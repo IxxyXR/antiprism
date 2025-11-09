@@ -24,6 +24,7 @@
 
 #include "antiprism_c_api.h"
 #include "antiprism.h"
+#include "geometryutils.h"
 #include "symmetro_wrapper.h"
 
 #include <cstring>
@@ -1171,6 +1172,39 @@ ANTIPRISM_API AntiStatus anti_make_cupola(AntiGeometryHandle geom, int n) {
   }
 }
 
+ANTIPRISM_API AntiStatus anti_make_geodesic(AntiGeometryHandle geom, int frequency, int method) {
+  if (!geom || frequency < 1)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry* out_geom = to_geom(geom);
+
+    // Create base polyhedron based on method
+    Geometry base;
+    switch (method) {
+      case 0:  // Icosahedron
+        base.read_resource("ico");
+        break;
+      case 1:  // Octahedron
+        base.read_resource("oct");
+        break;
+      case 2:  // Tetrahedron
+        base.read_resource("tet");
+        break;
+      default:
+        return ANTI_ERROR_INVALID_HANDLE;
+    }
+
+    // Generate geodesic sphere using Class I pattern (m=0, n=frequency)
+    bool success = make_geodesic_sphere(*out_geom, base, 0, frequency);
+
+    return success ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
 /*---------------------------------------------------------------------------
  * Symmetrohedra Generators
  *---------------------------------------------------------------------------*/
@@ -1203,7 +1237,8 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
     std::string error_msg;
     int err = symm.fill_sym_vec('k', &error_msg);
     if (err != 0) {
-      return ANTI_ERROR_UNKNOWN;
+      // Error in fill_sym_vec - invalid p,q combination for this symmetry
+      return ANTI_ERROR_PARSE;  // More specific error than UNKNOWN
     }
 
     // Calculate polygons
@@ -1222,7 +1257,8 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
 
     // Check if generation failed
     if (!error_msg.empty()) {
-      return ANTI_ERROR_UNKNOWN;
+      // Error in calc_polygons
+      return ANTI_ERROR_PARSE;  // More specific error than UNKNOWN
     }
 
     // Combine the two generated polygons into the output geometry

@@ -461,6 +461,13 @@ ANTIPRISM_API AntiStatus anti_make_dipyramid(AntiGeometryHandle geom, int n);
  * @return Status code */
 ANTIPRISM_API AntiStatus anti_make_cupola(AntiGeometryHandle geom, int n);
 
+/** Generate a geodesic sphere
+ * @param geom Handle to geometry object
+ * @param frequency Subdivision frequency (1-10 recommended)
+ * @param method Base polyhedron: 0=icosahedron, 1=octahedron, 2=tetrahedron
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_geodesic(AntiGeometryHandle geom, int frequency, int method);
+
 /*---------------------------------------------------------------------------
  * Symmetrohedra Generators (Kaplan-Hart notation)
  *---------------------------------------------------------------------------*/

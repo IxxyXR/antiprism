@@ -92,7 +92,7 @@
 - [x] Remove iteration loop interpretation of parameters (parameters are for behavior, not repetition)
 - [x] Add Snub and Ortho Conway operators
 
-### Completed in Current Session
+### Completed in Previous Session
 - [x] Fix Bevel parameter passing (use named parameter for ratio)
 - [x] Add 35+ new polyhedra types to Unity example (first batch):
   - [x] 4 missing Archimedean solids
@@ -111,7 +111,7 @@
   - [x] 5 uniform compounds
   - [x] 6 Wenninger stellations
   - [x] 4 miscellaneous special polyhedra
-- [x] **Total polyhedra types now available: 110+**
+- [x] **Total polyhedra types available before refactoring: 110+**
 - [x] Add C API for custom N-sided polygon-based polyhedra:
   - [x] anti_make_prism(n) - Generate N-sided prism
   - [x] anti_make_antiprism(n) - Generate N-sided antiprism
@@ -119,6 +119,17 @@
   - [x] anti_make_dipyramid(n) - Generate N-sided dipyramid
   - [x] anti_make_cupola(n) - Generate N-sided cupola
 - [x] Add Unity wrappers for polygon generators (CreatePrism, CreateAntiprism, etc.)
+
+### Completed in Current Session (2025-11-09)
+- [x] **MAJOR REFACTOR: Parameterize polyhedra types to reduce enum bloat**
+  - [x] Reduced PolyhedronType enum from ~110 entries to ~35 entries
+  - [x] Replaced individual Johnson solids (J6-J92) with single `JohnsonSolid` + index parameter
+  - [x] Replaced individual Uniform polyhedra (U4-U55) with single `UniformPolyhedron` + index parameter
+  - [x] Replaced individual Wenninger stellations (W1-W22) with single `Wenninger` + index parameter
+  - [x] Added missing `Geodesic` and `Symmetrohedra` to enum (were implemented but not selectable!)
+  - [x] Added inspector parameter fields: johnsonNumber (1-92), uniformNumber (1-80), wenningerNumber (1-119)
+  - [x] Updated CreateBasePolyhedron() to handle all 8 parameterized types
+  - [x] **Current polyhedra types: ~35 enum entries covering 200+ actual polyhedra** via parameterization
 
 ## Pending Tasks - High Priority
 
