@@ -1357,6 +1357,39 @@ ANTIPRISM_API AntiStatus anti_geometry_volume(AntiGeometryHandle geom,
   }
 }
 
+ANTIPRISM_API AntiStatus anti_geometry_get_face_color(AntiGeometryHandle geom,
+                                                       int face_idx,
+                                                       int* r, int* g, int* b, int* a) {
+  if (!geom || !r || !g || !b || !a)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Geometry* g = to_geom(geom);
+
+    // Check if face index is valid
+    if (face_idx < 0 || face_idx >= (int)g->faces().size())
+      return ANTI_ERROR_INVALID_INDEX;
+
+    // Get face color - FACES = 2 in const.h
+    Color col = g->get_cols()[2].get(face_idx);
+
+    // Check if color is set
+    if (!col.is_set())
+      return ANTI_ERROR_INVALID_INDEX;
+
+    // Get RGBA values (0-255)
+    *r = col[0];
+    *g = col[1];
+    *b = col[2];
+    *a = col[3];
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
 ANTIPRISM_API int anti_geometry_is_oriented(AntiGeometryHandle geom) {
   if (!geom)
     return -1;

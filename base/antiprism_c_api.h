@@ -513,6 +513,18 @@ ANTIPRISM_API AntiStatus anti_geometry_centroid(AntiGeometryHandle geom,
 ANTIPRISM_API AntiStatus anti_geometry_volume(AntiGeometryHandle geom,
                                                double* volume);
 
+/** Get face color
+ * @param geom Handle to geometry object
+ * @param face_idx Face index
+ * @param r Output for red component (0-255)
+ * @param g Output for green component (0-255)
+ * @param b Output for blue component (0-255)
+ * @param a Output for alpha component (0-255)
+ * @return Status code (ANTI_OK if color is set, ANTI_ERROR_INVALID_INDEX if no color) */
+ANTIPRISM_API AntiStatus anti_geometry_get_face_color(AntiGeometryHandle geom,
+                                                       int face_idx,
+                                                       int* r, int* g, int* b, int* a);
+
 /** Check if geometry is oriented
  * @param geom Handle to geometry object
  * @return 1 if oriented, 0 if not, -1 on error */

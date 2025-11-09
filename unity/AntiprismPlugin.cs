@@ -605,6 +605,91 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Get polyhedron data (vertices and faces) for use with mesh libraries
+        /// This is more efficient than GetVertices() + GetFaces() separately
+        /// </summary>
+        /// <param name="vertices">Output array of vertex positions</param>
+        /// <param name="faceIndices">Output array of face index arrays</param>
+        public void GetPolyhedronData(out Vector3[] vertices, out int[][] faceIndices)
+        {
+            Color[] dummyColors;
+            GetPolyhedronData(out vertices, out faceIndices, out dummyColors);
+        }
+
+        /// <summary>
+        /// Get polyhedron data including face colors for use with mesh libraries
+        /// This is more efficient than GetVertices() + GetFaces() + individual color queries
+        /// </summary>
+        /// <param name="vertices">Output array of vertex positions</param>
+        /// <param name="faceIndices">Output array of face index arrays</param>
+        /// <param name="faceColors">Output array of face colors (null entries for uncolored faces)</param>
+        public void GetPolyhedronData(out Vector3[] vertices, out int[][] faceIndices, out Color[] faceColors)
+        {
+            CheckDisposed();
+
+            // Get vertices
+            vertices = GetVertices();
+
+            // Get faces in original form (not triangulated)
+            int faceCount = FaceCount;
+            if (faceCount == 0)
+            {
+                faceIndices = new int[0][];
+                faceColors = new Color[0];
+                return;
+            }
+
+            // Allocate buffer for face data (estimate size)
+            int bufferSize = faceCount * 10; // Most faces won't exceed 10 vertices
+            int[] buffer = new int[bufferSize];
+            int totalSize = anti_geometry_get_all_faces(handle, buffer, bufferSize);
+
+            if (totalSize < 0)
+            {
+                faceIndices = new int[0][];
+                faceColors = new Color[0];
+                return;
+            }
+
+            // Parse the buffer into face arrays
+            System.Collections.Generic.List<int[]> faces = new System.Collections.Generic.List<int[]>();
+            int offset = 0;
+            while (offset < totalSize && faces.Count < faceCount)
+            {
+                int faceSize = buffer[offset];
+                offset++;
+
+                int[] face = new int[faceSize];
+                for (int i = 0; i < faceSize; i++)
+                {
+                    face[i] = buffer[offset];
+                    offset++;
+                }
+                faces.Add(face);
+            }
+
+            faceIndices = faces.ToArray();
+
+            // Get face colors
+            faceColors = new Color[faceCount];
+            for (int i = 0; i < faceCount; i++)
+            {
+                int r, g, b, a;
+                Status status = anti_geometry_get_face_color(handle, i, out r, out g, out b, out a);
+                if (status == Status.OK)
+                {
+                    // Convert from 0-255 to 0-1 range
+                    faceColors[i] = new Color(r / 255f, g / 255f, b / 255f, a / 255f);
+                }
+                else
+                {
+                    // No color set for this face - use white/clear
+                    faceColors[i] = new Color(1, 1, 1, 0);
+                }
+            }
+        }
+
+        /// <summary>
         /// Apply geometry to a Unity Mesh with optional flat shading
         /// </summary>
         public void ApplyToMesh(Mesh mesh, bool flatShading = true)
@@ -861,6 +946,13 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern int anti_geometry_face_vert(IntPtr geom, int faceIdx, int vertIdx);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern int anti_geometry_get_all_faces(IntPtr geom, int[] buffer, int bufferSize);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_geometry_get_face_color(IntPtr geom, int faceIdx,
+            out int r, out int g, out int b, out int a);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_geometry_unitize(IntPtr geom);
