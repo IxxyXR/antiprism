@@ -428,6 +428,40 @@ ANTIPRISM_API AntiStatus anti_make_polar_zonohedron(AntiGeometryHandle geom,
                                                      int spiral_step);
 
 /*---------------------------------------------------------------------------
+ * Polygon-Based Polyhedra Generators
+ *---------------------------------------------------------------------------*/
+
+/** Generate an N-sided prism
+ * @param geom Handle to geometry object
+ * @param n Number of sides (must be >= 3)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_prism(AntiGeometryHandle geom, int n);
+
+/** Generate an N-sided antiprism
+ * @param geom Handle to geometry object
+ * @param n Number of sides (must be >= 3)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_antiprism(AntiGeometryHandle geom, int n);
+
+/** Generate an N-sided pyramid
+ * @param geom Handle to geometry object
+ * @param n Number of sides (must be >= 3)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_pyramid(AntiGeometryHandle geom, int n);
+
+/** Generate an N-sided dipyramid (bipyramid)
+ * @param geom Handle to geometry object
+ * @param n Number of sides (must be >= 3)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_dipyramid(AntiGeometryHandle geom, int n);
+
+/** Generate an N-sided cupola
+ * @param geom Handle to geometry object
+ * @param n Number of sides (must be >= 2)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_cupola(AntiGeometryHandle geom, int n);
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 

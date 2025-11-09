@@ -657,6 +657,96 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Create an N-sided prism
+        /// </summary>
+        /// <param name="n">Number of sides (must be >= 3)</param>
+        /// <returns>New geometry containing the prism</returns>
+        public static Geometry CreatePrism(int n)
+        {
+            if (n < 3)
+                throw new ArgumentException("Prism must have at least 3 sides");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_prism(geom.handle, n);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create prism: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create an N-sided antiprism
+        /// </summary>
+        /// <param name="n">Number of sides (must be >= 3)</param>
+        /// <returns>New geometry containing the antiprism</returns>
+        public static Geometry CreateAntiprism(int n)
+        {
+            if (n < 3)
+                throw new ArgumentException("Antiprism must have at least 3 sides");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_antiprism(geom.handle, n);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create antiprism: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create an N-sided pyramid
+        /// </summary>
+        /// <param name="n">Number of sides (must be >= 3)</param>
+        /// <returns>New geometry containing the pyramid</returns>
+        public static Geometry CreatePyramid(int n)
+        {
+            if (n < 3)
+                throw new ArgumentException("Pyramid must have at least 3 sides");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_pyramid(geom.handle, n);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create pyramid: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create an N-sided dipyramid (bipyramid)
+        /// </summary>
+        /// <param name="n">Number of sides (must be >= 3)</param>
+        /// <returns>New geometry containing the dipyramid</returns>
+        public static Geometry CreateDipyramid(int n)
+        {
+            if (n < 3)
+                throw new ArgumentException("Dipyramid must have at least 3 sides");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_dipyramid(geom.handle, n);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create dipyramid: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create an N-sided cupola
+        /// </summary>
+        /// <param name="n">Number of sides (must be >= 2)</param>
+        /// <returns>New geometry containing the cupola</returns>
+        public static Geometry CreateCupola(int n)
+        {
+            if (n < 2)
+                throw new ArgumentException("Cupola must have at least 2 sides");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_cupola(geom.handle, n);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create cupola: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
         /// Load a built-in polyhedron (e.g., "cube", "tet", "ico", "dodec")
         /// </summary>
         public Status LoadResource(string name)
@@ -1240,5 +1330,20 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_make_polar_zonohedron(IntPtr geom, double[] star_vectors, int num_vectors, int step, int spiral_step);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_prism(IntPtr geom, int n);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_antiprism(IntPtr geom, int n);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_pyramid(IntPtr geom, int n);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_dipyramid(IntPtr geom, int n);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_cupola(IntPtr geom, int n);
     }
 }

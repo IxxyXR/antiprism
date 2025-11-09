@@ -1096,6 +1096,80 @@ ANTIPRISM_API AntiStatus anti_make_polar_zonohedron(AntiGeometryHandle geom,
 }
 
 /*---------------------------------------------------------------------------
+ * Polygon-Based Polyhedra Generators
+ *---------------------------------------------------------------------------*/
+
+ANTIPRISM_API AntiStatus anti_make_prism(AntiGeometryHandle geom, int n) {
+  if (!geom || n < 3)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Polygon pgon(n, 1, Polygon::prism, Polygon::sub_default);
+    Status stat = pgon.make_poly(*to_geom(geom));
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_antiprism(AntiGeometryHandle geom, int n) {
+  if (!geom || n < 3)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Polygon pgon(n, 1, Polygon::antiprism, Polygon::sub_default);
+    Status stat = pgon.make_poly(*to_geom(geom));
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_pyramid(AntiGeometryHandle geom, int n) {
+  if (!geom || n < 3)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Polygon pgon(n, 1, Polygon::pyramid, Polygon::sub_default);
+    Status stat = pgon.make_poly(*to_geom(geom));
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_dipyramid(AntiGeometryHandle geom, int n) {
+  if (!geom || n < 3)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Polygon pgon(n, 1, Polygon::dipyramid, Polygon::sub_default);
+    Status stat = pgon.make_poly(*to_geom(geom));
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_cupola(AntiGeometryHandle geom, int n) {
+  if (!geom || n < 2)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    Polygon pgon(n, 1, Polygon::cupola, Polygon::sub_default);
+    Status stat = pgon.make_poly(*to_geom(geom));
+    return stat.is_ok() ? ANTI_OK : ANTI_ERROR_UNKNOWN;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 
