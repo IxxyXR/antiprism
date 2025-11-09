@@ -507,6 +507,26 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_advanced(
     int d0, int d1, double rotation, int sym_id);
 
 /*---------------------------------------------------------------------------
+ * 2D Tiling Generators (unitile2d)
+ *---------------------------------------------------------------------------*/
+
+/** Generate a uniform 2D tiling on a surface
+ * @param geom Handle to geometry object
+ * @param pattern Pattern number (1-11):
+ *                1=4,4,4,4  2=3,3,3,3,3,3  3=6,6,6  4=3,6,3,6  5=3,3,3,4,4
+ *                6=3,3,4,3,4  7=3,3,3,3,6  8=3,12,12  9=4,8,8  10=3,4,6,4  11=4,6,12
+ * @param surface_type Surface to tile on:
+ *                     0=plane, 1=torus, 2=klein_bottle, 3=mobius_strip
+ * @param width Width of tiling (number of pattern repeats)
+ * @param height Height of tiling (number of pattern repeats, 0 = use width)
+ * @param minor_radius Minor radius for torus/klein/mobius (tube/strip width)
+ * @param major_radius Major radius for torus/klein/mobius (ring radius)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_unitile2d(
+    AntiGeometryHandle geom, int pattern, int surface_type,
+    double width, double height, double minor_radius, double major_radius);
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 

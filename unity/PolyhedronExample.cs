@@ -37,6 +37,29 @@ public class PolyhedronExample : MonoBehaviour
     [Tooltip("Geodesic base polyhedron")]
     public GeodesicMethod geodesicMethod = GeodesicMethod.Icosahedron;
 
+    [Header("2D Tiling Settings")]
+    [Tooltip("Tiling pattern (11 uniform tilings)")]
+    public TilingPattern tilingPattern = TilingPattern.Squares_4444;
+
+    [Tooltip("Surface to tile on")]
+    public TilingSurface tilingSurface = TilingSurface.Torus;
+
+    [Tooltip("Width of tiling (pattern repeats, typically 10-40)")]
+    [Range(5, 80)]
+    public float tilingWidth = 20;
+
+    [Tooltip("Height of tiling (0 = use width)")]
+    [Range(0, 80)]
+    public float tilingHeight = 0;
+
+    [Tooltip("Minor radius for torus/klein/mobius (tube/strip width)")]
+    [Range(0.1f, 3.0f)]
+    public float tilingMinorRadius = 1.0f;
+
+    [Tooltip("Major radius for torus/klein/mobius (ring radius)")]
+    [Range(1.0f, 10.0f)]
+    public float tilingMajorRadius = 3.0f;
+
     [Header("Symmetrohedra Settings (Kaplan-Hart notation: -k sym,mult0,mult1,mult2)")]
     [Tooltip("Symmetry: T (tetrahedral), O (octahedral), I (icosahedral)")]
     public char symmetroSym = 'O';
@@ -352,6 +375,10 @@ public class PolyhedronExample : MonoBehaviour
 
             case PolyhedronType.Geodesic:
                 return Geometry.CreateGeodesic(geodesicFrequency, geodesicMethod);
+
+            case PolyhedronType.Unitile2D:
+                return Geometry.CreateUnitile2D(tilingPattern, tilingSurface,
+                    tilingWidth, tilingHeight, tilingMinorRadius, tilingMajorRadius);
 
             case PolyhedronType.Symmetrohedra:
                 // Validate symmetry type

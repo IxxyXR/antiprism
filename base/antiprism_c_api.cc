@@ -44,6 +44,346 @@ namespace {
   inline AntiGeometryHandle from_geom(Geometry* g) {
     return static_cast<AntiGeometryHandle>(g);
   }
+
+  // unitile2d implementation - creates uniform 2D tilings on surfaces
+  class unitile : public Geometry {
+  private:
+    int pat;
+    double x_end;
+    double x_inc;
+    double y_end;
+    double y_inc;
+    bool to_tile;
+    Trans3d trans_m;
+    Vec3d shear;
+    std::vector<Vec3d> poly;
+
+    void ut_4444();   //  1
+    void ut_333333(); //  2
+    void ut_666();    //  3
+    void ut_3636();   //  4
+    void ut_33344();  //  5
+    void ut_33434();  //  6
+    void ut_33336();  //  7
+    void ut_31212();  //  8
+    void ut_488();    //  9
+    void ut_3464();   // 10
+    void ut_4612();   // 11
+
+    void set_polygon(int num_sides, double rot_ang = 0);
+    void add_polygon(double x_start, double y_start);
+    void set_incs(double xinc, double yinc);
+
+  public:
+    enum { ut_open, ut_join, ut_join2, ut_twist, ut_twist2, ut_twist3 };
+
+    unitile(int patt, double width, double height, bool totile = true,
+            Trans3d trans = Trans3d(), Vec3d shr = Vec3d(0, 0, 0))
+        : pat(patt), x_end(width), y_end(height), to_tile(totile),
+          trans_m(trans), shear(shr) {}
+
+    void plane(int lr_join, int tb_join);
+    void torus(double sect_rad, double ring_rad);
+    void klein(double sect_rad, double ring_rad);
+    void mobius(double sect_rad, double ring_rad);
+  };
+
+  // unitile method implementations
+  void unitile::set_incs(double xinc, double yinc) {
+    x_inc = xinc;
+    y_inc = yinc;
+    if (to_tile) {
+      x_end = ceil(x_end / x_inc) * x_inc;
+      y_end = ceil(y_end / y_inc) * y_inc;
+    }
+  }
+
+  void unitile::set_polygon(int num_sides, double rot_ang) {
+    poly.clear();
+    double ang = 2 * M_PI / num_sides;
+    double rad = 0.5 / sin(ang / 2);
+    for (int i = 0; i < num_sides; i++)
+      poly.push_back(Vec3d(rad * cos(i * ang + rot_ang),
+                           rad * sin(i * ang + rot_ang), 0));
+  }
+
+  void unitile::add_polygon(double x_start, double y_start) {
+    std::vector<Vec3d> &verts = raw_verts();
+    std::vector<std::vector<int>> &faces = raw_faces();
+    int x_steps = (x_end - anti::epsilon - x_start) / x_inc;
+    int y_steps = (y_end - anti::epsilon - y_start) / y_inc;
+    for (int i = 0; i <= x_steps; i++) {
+      double x = x_start + i * x_inc;
+      if (x < -anti::epsilon) continue;
+      for (int j = 0; j <= y_steps; j++) {
+        double y = y_start + j * y_inc;
+        if (y < -anti::epsilon) continue;
+        Vec3d cent(x, y, 0);
+        std::vector<Vec3d> tile;
+        for (auto &v : poly) tile.push_back(v + cent);
+        std::vector<int> face;
+        for (unsigned int k = 0; k < tile.size(); k++)
+          face.push_back(verts.size() + k);
+        faces.push_back(face);
+        verts.insert(verts.end(), tile.begin(), tile.end());
+      }
+    }
+  }
+
+  void unitile::ut_4444() {
+    set_incs(1, 1);
+    set_polygon(4, M_PI / 4);
+    add_polygon(0.5, 0.5);
+  }
+
+  void unitile::ut_333333() {
+    set_incs(sqrt(3), 1);
+    set_polygon(3, M_PI);
+    add_polygon(0, 0);
+    add_polygon(sqrt(3) / 2, 0.5);
+    set_polygon(3);
+    add_polygon(sqrt(3) / 3, 0);
+    add_polygon(sqrt(3) * 5 / 6, 0.5);
+  }
+
+  void unitile::ut_666() {
+    set_incs(sqrt(3), 3);
+    set_polygon(6, M_PI / 6);
+    add_polygon(0, 0);
+    add_polygon(sqrt(3) / 2, 1.5);
+  }
+
+  void unitile::ut_3636() {
+    set_incs(sqrt(3) * 2, 2);
+    set_polygon(3);
+    add_polygon(sqrt(3) * 2 / 3, 0);
+    add_polygon(sqrt(3) * 5 / 3, 1);
+    set_polygon(3, M_PI);
+    add_polygon(sqrt(3) * 1 / 3, 1);
+    add_polygon(sqrt(3) * 4 / 3, 0);
+    set_polygon(6, M_PI / 6);
+    add_polygon(0, 0);
+    add_polygon(sqrt(3), 1);
+  }
+
+  void unitile::ut_33344() {
+    set_incs(1, 2 + sqrt(3));
+    set_polygon(3, M_PI / 2);
+    add_polygon(0, 0.5 + sqrt(3) / 6);
+    add_polygon(0.5, 1.5 + sqrt(3) * 2 / 3);
+    set_polygon(3, -M_PI / 2);
+    add_polygon(0, 1.5 + sqrt(3) * 5 / 6);
+    add_polygon(0.5, 0.5 + sqrt(3) * 1 / 3);
+    set_polygon(4, M_PI / 4);
+    add_polygon(0, 0);
+    add_polygon(0.5, 1 + sqrt(3) / 2);
+  }
+
+  void unitile::ut_33434() {
+    double l = 1 + sqrt(3);
+    set_incs(l, l);
+    set_polygon(4, -M_PI / 12);
+    add_polygon(l / 4, l / 4);
+    add_polygon(3 * l / 4, 3 * l / 4);
+    set_polygon(4, M_PI / 12);
+    add_polygon(l / 4, 3 * l / 4);
+    add_polygon(3 * l / 4, l / 4);
+    double d = 1 / sqrt(12);
+    set_polygon(3, 0);
+    add_polygon(d, l / 2);
+    add_polygon(l / 2 + d, 0);
+    set_polygon(3, M_PI);
+    add_polygon(l - d, l / 2);
+    add_polygon(l / 2 - d, 0);
+    set_polygon(3, M_PI / 2);
+    add_polygon(0, d);
+    add_polygon(l / 2, l / 2 + d);
+    set_polygon(3, -M_PI / 2);
+    add_polygon(0, l - d);
+    add_polygon(l / 2, l / 2 - d);
+  }
+
+  void unitile::ut_33336() {
+    double rot = acos(5 / (sqrt(7) * 2));
+    set_incs(sqrt(7), sqrt(21));
+    set_polygon(6, rot);
+    add_polygon(0, 0);
+    add_polygon(sqrt(7) / 2, sqrt(21) / 2);
+    for (int i = 0; i < 6; i++) {
+      double rot2 = rot + M_PI / 6 + i * M_PI / 3;
+      Trans3d trans = Trans3d::rotate(0, 0, rot2) *
+                      Trans3d::translate(Vec3d(sqrt(3) - 1 / sqrt(3), 0, 0));
+      set_polygon(3, rot2);
+      Vec3d cent = trans * Vec3d(0, 0, 0);
+      add_polygon(cent[0], cent[1]);
+      add_polygon(cent[0] + sqrt(7) / 2, cent[1] + sqrt(21) / 2);
+      if (i < 3) {
+        trans = trans * Trans3d::translate(Vec3d(0, 1, 0));
+        cent = trans * Vec3d(0, 0, 0);
+        if (i == 1) add_polygon(cent[0], cent[1]);
+        add_polygon(cent[0] + sqrt(7) / 2, cent[1] + sqrt(21) / 2);
+      }
+    }
+  }
+
+  void unitile::ut_31212() {
+    set_incs(2 + sqrt(3), 3 + sqrt(3) * 2);
+    set_polygon(12, M_PI / 12);
+    add_polygon(0, 0);
+    add_polygon(1 + sqrt(3) / 2, 1.5 + sqrt(3));
+    set_polygon(3, -M_PI / 6);
+    add_polygon(1 + sqrt(3) / 2, 2.5 + sqrt(3) * 5 / 3);
+    add_polygon(0, 1 + sqrt(3) * 2 / 3);
+    set_polygon(3, M_PI / 6);
+    add_polygon(1 + sqrt(3) / 2, 0.5 + sqrt(3) / 3);
+    add_polygon(0, 2 + sqrt(3) * 4 / 3);
+  }
+
+  void unitile::ut_488() {
+    double l = 1 + sqrt(2);
+    set_incs(l, l);
+    set_polygon(4);
+    add_polygon(l / 2, l / 2);
+    set_polygon(8, M_PI / 8);
+    add_polygon(0, 0);
+  }
+
+  void unitile::ut_3464() {
+    set_incs(1 + sqrt(3), 3 + sqrt(3));
+    set_polygon(3, M_PI / 6);
+    add_polygon(0, 1 + sqrt(3) / 3);
+    add_polygon(0.5 + sqrt(3) / 2, 2.5 + sqrt(3) * 5 / 6);
+    set_polygon(3, -M_PI / 6);
+    add_polygon(0, 2 + sqrt(3) * 2 / 3);
+    add_polygon(0.5 + sqrt(3) / 2, 0.5 + sqrt(3) / 6);
+    set_polygon(4, M_PI / 12);
+    add_polygon(0.25 + sqrt(3) / 4, 0.75 + sqrt(3) / 4);
+    add_polygon(-0.25 - sqrt(3) / 4, 2.25 + sqrt(3) * 3 / 4);
+    set_polygon(4, -M_PI / 12);
+    add_polygon(-0.25 - sqrt(3) / 4, 0.75 + sqrt(3) / 4);
+    add_polygon(0.25 + sqrt(3) / 4, 2.25 + sqrt(3) * 3 / 4);
+    set_polygon(4, M_PI / 4);
+    add_polygon(0.5 + sqrt(3) / 2, 0);
+    add_polygon(0, 1.5 + sqrt(3) / 2);
+    set_polygon(6, M_PI / 6);
+    add_polygon(0, 0);
+    add_polygon(0.5 + sqrt(3) / 2, 1.5 + sqrt(3) / 2);
+  }
+
+  void unitile::ut_4612() {
+    set_incs(3 + sqrt(3), 3 + sqrt(3) * 3);
+    set_polygon(4, M_PI / 12);
+    add_polygon(0.75 + sqrt(3) / 4, 0.75 + sqrt(3) * 3 / 4);
+    add_polygon(2.25 + sqrt(3) * 3 / 4, 2.25 + sqrt(3) * 9 / 4);
+    set_polygon(4, -M_PI / 12);
+    add_polygon(2.25 + sqrt(3) * 3 / 4, 0.75 + sqrt(3) * 3 / 4);
+    add_polygon(0.75 + sqrt(3) / 4, 2.25 + sqrt(3) * 9 / 4);
+    set_polygon(4, M_PI / 4);
+    add_polygon(1.5 + sqrt(3) / 2, 0);
+    add_polygon(0, 1.5 + sqrt(3) * 3 / 2);
+    set_polygon(6);
+    add_polygon(0, 1 + sqrt(3));
+    add_polygon(0, 2 + sqrt(3) * 2);
+    add_polygon(1.5 + sqrt(3) / 2, 2.5 + sqrt(3) * 5 / 2);
+    add_polygon(1.5 + sqrt(3) / 2, 0.5 + sqrt(3) / 2);
+    set_polygon(12, M_PI / 12);
+    add_polygon(0, 0);
+    add_polygon(1.5 + sqrt(3) / 2, 1.5 + sqrt(3) * 3 / 2);
+  }
+
+  void unitile::plane(int lr_join, int tb_join) {
+    double local_epsilon = 1e-6;
+    clear_all();
+    void (unitile::*pat_funcs[])() = {
+        nullptr, &unitile::ut_4444, &unitile::ut_333333, &unitile::ut_666,
+        &unitile::ut_3636, &unitile::ut_33344, &unitile::ut_33434,
+        &unitile::ut_33336, &unitile::ut_31212, &unitile::ut_488,
+        &unitile::ut_3464, &unitile::ut_4612};
+    (this->*(pat_funcs[pat]))();
+
+    double x_sh_inc = shear[0] * x_inc;
+    double y_sh_inc = shear[1] * y_inc;
+    double x_sh_inc2 = x_sh_inc * (1 + y_sh_inc / y_end);
+    double y_sh_inc2 = y_sh_inc * (1 + x_sh_inc / x_end);
+    double x_cross = x_end + x_sh_inc - x_sh_inc2;
+    double y_cross = y_end + y_sh_inc - y_sh_inc2;
+    std::vector<Vec3d> &verts = raw_verts();
+    for (auto &vert : verts) {
+      double x = vert[0];
+      vert[0] += (shear[0] * x_inc) * (vert[1] / y_end);
+      vert[0] *= x_end / x_cross;
+      vert[1] += (shear[1] * y_inc) * (x / x_end);
+      vert[1] *= y_end / y_cross;
+    }
+    for (auto &vert : verts) {
+      if (lr_join == ut_twist &&
+          (vert[0] < -local_epsilon || vert[0] > x_end - local_epsilon))
+        vert[1] = -vert[1];
+      if (lr_join == ut_twist2 &&
+          (vert[0] < -local_epsilon || vert[0] > x_end - local_epsilon))
+        vert[1] = y_end - vert[1];
+      if (lr_join == ut_twist3 &&
+          (vert[0] < -local_epsilon || vert[0] > x_end - local_epsilon))
+        vert[1] = fmod(1.5 * y_end - vert[1], y_end);
+      if (tb_join == ut_twist &&
+          (vert[1] < -local_epsilon || vert[1] > y_end - local_epsilon))
+        vert[0] = -vert[0];
+      if (tb_join == ut_twist2 &&
+          (vert[1] < -local_epsilon || vert[1] > y_end - local_epsilon))
+        vert[0] = x_end - vert[0];
+      if (tb_join == ut_twist3 &&
+          (vert[1] < -local_epsilon || vert[1] > y_end - local_epsilon))
+        vert[0] = fmod(1.5 * x_end - vert[0], x_end);
+      if (tb_join == ut_join2 &&
+          (vert[1] < -local_epsilon || vert[1] > y_end - local_epsilon))
+        vert[0] = fmod(0.5 * x_end - vert[0], x_end);
+      if (lr_join != ut_open) {
+        vert[0] = fmod(vert[0] + x_end, x_end - epsilon);
+      }
+      if (tb_join != ut_open) {
+        vert[1] = fmod(vert[1] + y_end, y_end - epsilon);
+      }
+    }
+    merge_coincident_elements(*this, "v", 1e-3);
+    transform(trans_m);
+  }
+
+  void unitile::torus(double sect_rad, double ring_rad) {
+    plane(ut_join, ut_join);
+    double a0, a1;
+    std::vector<Vec3d> &verts = raw_verts();
+    for (auto &vert : verts) {
+      a0 = 2 * M_PI * vert[0] / x_end;
+      a1 = 2 * M_PI * vert[1] / y_end;
+      vert = Vec3d((ring_rad + sect_rad * cos(a1)) * cos(a0),
+                   (ring_rad + sect_rad * cos(a1)) * sin(a0),
+                   sect_rad * sin(a1));
+    }
+  }
+
+  void unitile::klein(double sect_rad, double ring_rad) {
+    plane(ut_join, ut_join2);
+    double a0, a1;
+    std::vector<Vec3d> &verts = raw_verts();
+    for (auto &vert : verts) {
+      a0 = 2 * M_PI * vert[0] / x_end;
+      a1 = M_PI * vert[1] / y_end;
+      vert = Vec3d((ring_rad + sect_rad * cos(a1)) * cos(a0),
+                   (ring_rad + sect_rad * cos(a1)) * sin(a0),
+                   sect_rad * sin(a1) * cos(a0 / 2));
+    }
+  }
+
+  void unitile::mobius(double sect_rad, double ring_rad) {
+    plane(ut_twist, ut_open);
+    double a0;
+    std::vector<Vec3d> &verts = raw_verts();
+    for (auto &vert : verts) {
+      a0 = 2 * M_PI * vert[0] / x_end;
+      double r = ring_rad + vert[1] * sect_rad * cos(a0 / 2);
+      vert = Vec3d(r * cos(a0), r * sin(a0), vert[1] * sect_rad * sin(a0 / 2));
+    }
+  }
 }
 
 /*---------------------------------------------------------------------------
@@ -1469,6 +1809,72 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_advanced(
         out_geom->append(pg);
       }
     }
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+/*---------------------------------------------------------------------------
+ * 2D Tiling Generators
+ *---------------------------------------------------------------------------*/
+
+ANTIPRISM_API AntiStatus anti_make_unitile2d(
+    AntiGeometryHandle geom, int pattern, int surface_type,
+    double width, double height, double minor_radius, double major_radius) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate pattern (1-11)
+  if (pattern < 1 || pattern > 11)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate surface type (0-3)
+  if (surface_type < 0 || surface_type > 3)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Use width for height if height is 0 or negative
+  if (height <= 0)
+    height = width;
+
+  // Validate dimensions
+  if (width <= 0)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Create unitile object
+    unitile tile(pattern, width, height);
+
+    // Generate tiling based on surface type
+    switch (surface_type) {
+      case 0:  // Plane
+        tile.plane(unitile::ut_open, unitile::ut_open);
+        break;
+
+      case 1:  // Torus
+        tile.torus(minor_radius, major_radius);
+        break;
+
+      case 2:  // Klein bottle
+        tile.klein(minor_radius, major_radius);
+        break;
+
+      case 3:  // Mobius strip
+        tile.mobius(minor_radius, major_radius);
+        break;
+
+      default:
+        return ANTI_ERROR_INVALID_HANDLE;
+    }
+
+    // Copy result to output geometry
+    Geometry* out_geom = to_geom(geom);
+    *out_geom = tile;  // Copy the generated tiling
+
+    if (out_geom->verts().size() == 0)
+      return ANTI_ERROR_UNKNOWN;
 
     return ANTI_OK;
   }

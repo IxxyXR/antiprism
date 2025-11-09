@@ -38,6 +38,7 @@ namespace Antiprism
         Dipyramid,          // N-sided dipyramid/bipyramid (n >= 3)
         Cupola,             // N-sided cupola (n >= 2)
         Geodesic,           // Geodesic sphere (requires frequency and method)
+        Unitile2D,          // 2D tiling on a surface (11 patterns x 4 surfaces)
         Symmetrohedra,      // Symmetrohedra using Kaplan-Hart notation
         JohnsonSolid,       // Johnson solid by number (J1-J92)
         UniformPolyhedron,  // Uniform polyhedron by number (U1-U80) - includes all Archimedean & Kepler-Poinsot
@@ -69,6 +70,35 @@ namespace Antiprism
         Icosahedron,    // Subdivide icosahedron
         Octahedron,     // Subdivide octahedron
         Tetrahedron,    // Subdivide tetrahedron
+    }
+
+    /// <summary>
+    /// Uniform tiling patterns (11 possible tilings)
+    /// </summary>
+    public enum TilingPattern
+    {
+        Squares_4444 = 1,        // 4,4,4,4 (square tiling)
+        Triangles_333333 = 2,    // 3,3,3,3,3,3 (triangle tiling)
+        Hexagons_666 = 3,        // 6,6,6 (hexagon tiling)
+        TriHex_3636 = 4,         // 3,6,3,6 (triangle-hexagon)
+        TriSquare_33344 = 5,     // 3,3,3,4,4 (triangle-square)
+        SnubSquare_33434 = 6,    // 3,3,4,3,4 (snub square)
+        SnubHex_33336 = 7,       // 3,3,3,3,6 (snub hexagon)
+        TriDodec_31212 = 8,      // 3,12,12 (triangle-dodecagon)
+        SquareOct_488 = 9,       // 4,8,8 (square-octagon)
+        TriSquareHex_3464 = 10,  // 3,4,6,4 (triangle-square-hexagon)
+        SquareHexDodec_4612 = 11 // 4,6,12 (square-hexagon-dodecagon)
+    }
+
+    /// <summary>
+    /// Surface types for tilings
+    /// </summary>
+    public enum TilingSurface
+    {
+        Plane = 0,         // Flat rectangular plane
+        Torus = 1,         // Donut/torus surface
+        KleinBottle = 2,   // Klein bottle (non-orientable)
+        MobiusStrip = 3    // Mobius strip (single-sided)
     }
 
     /// <summary>
@@ -155,6 +185,7 @@ namespace Antiprism
                 case PolyhedronType.Dipyramid:
                 case PolyhedronType.Cupola:
                 case PolyhedronType.Geodesic:
+                case PolyhedronType.Unitile2D:
                 case PolyhedronType.Symmetrohedra:
                 case PolyhedronType.JohnsonSolid:
                 case PolyhedronType.UniformPolyhedron:
@@ -319,6 +350,35 @@ namespace Antiprism
             Status status = anti_make_geodesic(geom.handle, frequency, (int)method);
             if (status != Status.OK)
                 throw new Exception($"Failed to create geodesic sphere: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create a uniform 2D tiling on a surface
+        /// </summary>
+        /// <param name="pattern">Tiling pattern (1-11)</param>
+        /// <param name="surface">Surface to tile on</param>
+        /// <param name="width">Width of tiling (number of pattern repeats, typically 10-40)</param>
+        /// <param name="height">Height of tiling (0 = use width)</param>
+        /// <param name="minorRadius">Minor radius for torus/klein/mobius (tube/strip width, default 1)</param>
+        /// <param name="majorRadius">Major radius for torus/klein/mobius (ring radius, default 3)</param>
+        /// <returns>New Geometry containing the tiling</returns>
+        /// <remarks>
+        /// Creates uniform tilings (tessellations) mapped onto various surfaces.
+        /// Examples:
+        ///   - Square tiling on plane: pattern=Squares_4444, surface=Plane, width=20
+        ///   - Triangle tiling on torus: pattern=Triangles_333333, surface=Torus, width=30
+        ///   - Hexagon tiling on Klein bottle: pattern=Hexagons_666, surface=KleinBottle
+        /// </remarks>
+        public static Geometry CreateUnitile2D(TilingPattern pattern, TilingSurface surface = TilingSurface.Plane,
+            double width = 20, double height = 0, double minorRadius = 1.0, double majorRadius = 3.0)
+        {
+            Geometry geom = new Geometry();
+            Status status = anti_make_unitile2d(geom.handle, (int)pattern, (int)surface,
+                width, height, minorRadius, majorRadius);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create tiling: {status}");
 
             return geom;
         }
@@ -996,6 +1056,12 @@ namespace Antiprism
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_make_geodesic(IntPtr geom, int frequency, int method);
+
+        // 2D Tiling generators
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_unitile2d(
+            IntPtr geom, int pattern, int surface_type,
+            double width, double height, double minor_radius, double major_radius);
 
         // Symmetrohedra generators
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
