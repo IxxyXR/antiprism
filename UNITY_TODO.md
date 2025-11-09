@@ -33,6 +33,13 @@
   - [x] 6 Wenninger stellations
   - [x] 4 miscellaneous special polyhedra
 - [x] **Total polyhedra types now available: 110+**
+- [x] Add C API for custom N-sided polygon-based polyhedra:
+  - [x] anti_make_prism(n) - Generate N-sided prism
+  - [x] anti_make_antiprism(n) - Generate N-sided antiprism
+  - [x] anti_make_pyramid(n) - Generate N-sided pyramid
+  - [x] anti_make_dipyramid(n) - Generate N-sided dipyramid
+  - [x] anti_make_cupola(n) - Generate N-sided cupola
+- [x] Add Unity wrappers for polygon generators (CreatePrism, CreateAntiprism, etc.)
 
 ## Pending Tasks - High Priority
 
@@ -68,14 +75,14 @@
 ## Future Enhancements
 
 ### Additional Polyhedra Generators
-- [ ] Add custom N-sided prism/antiprism/pyramid/dipyramid with inspector parameter (requires C API changes)
+- [x] Add custom N-sided prism/antiprism/pyramid/dipyramid with inspector parameter - COMPLETED (C API + Unity wrappers)
 - [x] Add more geodesic subdivisions (5, 6, 8) - COMPLETED
 - [x] Add cupola variants (elongated, gyroelongated) - COMPLETED (added j18-j20, j36-j38)
 - [x] Add more Johnson solids (92 available total) - COMPLETED (added 24 more: j7, j9, j11, j18-j20, j27-j38, j85, j92)
 - [x] Add more uniform polyhedra (80 available total) - COMPLETED (added 9 more: u4, u15, u17, u18, u21, u37, u38, u54, u55)
 - [x] Add uniform compounds (75 available) - COMPLETED (added 5 famous ones: uc1-uc5)
 - [x] Add Wenninger stellations - COMPLETED (added 6: w1, w2, w3, w9, w20, w22)
-- [ ] Add zonohedra generators (requires C API for custom vectors)
+- [x] Add zonohedra generators - COMPLETED (C API already existed, Unity wrappers already present)
 
 ### Conway Operator Enhancements
 - [ ] Implement actual parameter behavior for operators (not just reserved)
