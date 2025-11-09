@@ -1264,10 +1264,25 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
     // Set symmetry
     symm.setSym(sym, p, q, 0, 1);  // sym_id always 1 for basic usage
 
-    // Set multipliers for all three axes
-    symm.setMult(0, mult0);
-    symm.setMult(1, mult1);
-    symm.setMult(2, mult2);
+    // Build index array of non-zero multipliers (matching CLI tool behavior)
+    // setMult expects indices in order: setMult(0, first_nonzero_mult), setMult(1, second_nonzero_mult)
+    std::vector<int> idx;
+    std::vector<int> mults = {mult0, mult1, mult2};
+    for (int i = 0; i < 3; i++) {
+      if (mults[i] > 0) {
+        idx.push_back(i);
+      }
+    }
+
+    // If only one multiplier, duplicate the index (same polygon on both axes)
+    if (idx.size() == 1) {
+      idx.push_back(idx[0]);
+    }
+
+    // Set multipliers using the non-zero indices
+    for (size_t i = 0; i < idx.size(); i++) {
+      symm.setMult(i, mults[idx[i]]);
+    }
 
     // Fill symmetry vectors (Kaplan-Hart mode)
     std::string error_msg;
@@ -1297,6 +1312,11 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
       return ANTI_ERROR_PARSE;  // More specific error than UNKNOWN
     }
 
+    // Check if polygons were generated
+    if (pgeoms.empty()) {
+      return ANTI_ERROR_PARSE;  // No polygons generated
+    }
+
     // Combine the two generated polygons into the output geometry
     Geometry* out_geom = to_geom(geom);
     out_geom->clear_all();
@@ -1305,6 +1325,11 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
       if (pg.verts().size() > 0) {
         out_geom->append(pg);
       }
+    }
+
+    // Verify we have valid geometry
+    if (out_geom->verts().size() == 0) {
+      return ANTI_ERROR_PARSE;  // Empty geometry generated
     }
 
     return ANTI_OK;
