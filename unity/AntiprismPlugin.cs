@@ -335,28 +335,34 @@ namespace Antiprism
         }
 
         /// <summary>
-        /// Create a symmetrohedron using Kaplan-Hart notation
+        /// Create a symmetrohedron using Kaplan-Hart notation (matches CLI: -k sym,mult0,mult1,mult2)
         /// </summary>
         /// <param name="sym">Symmetry type: 'T' (tetrahedral), 'O' (octahedral), 'I' (icosahedral)</param>
-        /// <param name="p">First Schläfli parameter</param>
-        /// <param name="q">Second Schläfli parameter</param>
-        /// <param name="l">Multiplier for first axis (0 = no polygon on this axis)</param>
-        /// <param name="m">Multiplier for second axis (0 = no polygon on this axis)</param>
-        /// <param name="symId">Symmetry ID number (typically 1)</param>
+        /// <param name="mult0">Multiplier for primary axis (0 = skip)</param>
+        /// <param name="mult1">Multiplier for secondary axis (0 = skip)</param>
+        /// <param name="mult2">Multiplier for tertiary axis (0 = skip)</param>
         /// <returns>New Geometry containing the symmetrohedron</returns>
-        public static Geometry CreateSymmetroKaplanHart(char sym, int p, int q, int l, int m, int symId = 1)
+        /// <remarks>
+        /// Axis orders: T=[3,3,2], O=[4,3,2], I=[5,3,2]
+        /// Examples:
+        ///   - Cuboctahedron: sym='O', mult0=1, mult1=1, mult2=0
+        ///   - Snub Cube: sym='O', mult0=1, mult1=0, mult2=1
+        /// At least one and at most two multipliers must be non-zero.
+        /// </remarks>
+        public static Geometry CreateSymmetroKaplanHart(char sym, int mult0, int mult1, int mult2)
         {
             if (sym != 'T' && sym != 'O' && sym != 'I')
                 throw new ArgumentException("Symmetry must be 'T', 'O', or 'I'");
 
-            if (p < 2 || q < 2)
-                throw new ArgumentException("Schläfli parameters must be >= 2");
-
-            if (l < 0 || m < 0)
+            if (mult0 < 0 || mult1 < 0 || mult2 < 0)
                 throw new ArgumentException("Multipliers must be >= 0");
 
+            int numMultipliers = (mult0 > 0 ? 1 : 0) + (mult1 > 0 ? 1 : 0) + (mult2 > 0 ? 1 : 0);
+            if (numMultipliers == 0 || numMultipliers == 3)
+                throw new ArgumentException("At least one and at most two multipliers must be non-zero");
+
             Geometry geom = new Geometry();
-            Status status = anti_make_symmetro_kaplan_hart(geom.handle, sym, p, q, l, m, symId);
+            Status status = anti_make_symmetro_kaplan_hart(geom.handle, sym, mult0, mult1, mult2);
             if (status != Status.OK)
                 throw new Exception($"Failed to create symmetrohedron: {status}");
 
@@ -977,7 +983,7 @@ namespace Antiprism
         // Symmetrohedra generators
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_make_symmetro_kaplan_hart(
-            IntPtr geom, char sym, int p, int q, int l, int m, int sym_id);
+            IntPtr geom, char sym, int mult0, int mult1, int mult2);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
         private static extern Status anti_make_symmetro_advanced(

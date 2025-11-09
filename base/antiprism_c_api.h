@@ -472,17 +472,16 @@ ANTIPRISM_API AntiStatus anti_make_geodesic(AntiGeometryHandle geom, int frequen
  * Symmetrohedra Generators (Kaplan-Hart notation)
  *---------------------------------------------------------------------------*/
 
-/** Generate a symmetrohedron using Kaplan-Hart notation
+/** Generate a symmetrohedron using Kaplan-Hart notation (matches CLI: -k sym,mult0,mult1,mult2)
  * @param geom Handle to geometry object
  * @param sym Symmetry type: 'T' (tetrahedral), 'O' (octahedral), 'I' (icosahedral)
- * @param p First Schläfli parameter
- * @param q Second Schläfli parameter
- * @param l Multiplier for first axis (0 = no polygon on this axis)
- * @param m Multiplier for second axis (0 = no polygon on this axis)
- * @param sym_id Symmetry ID number (typically 1)
- * @return Status code */
+ * @param mult0 Multiplier for primary axis (0 = skip this axis)
+ * @param mult1 Multiplier for secondary axis (0 = skip this axis)
+ * @param mult2 Multiplier for tertiary axis (0 = skip this axis)
+ * @return Status code
+ * @note Axis orders: T=[3,3,2], O=[4,3,2], I=[5,3,2]. p,q calculated from non-zero multipliers. */
 ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
-    AntiGeometryHandle geom, char sym, int p, int q, int l, int m, int sym_id);
+    AntiGeometryHandle geom, char sym, int mult0, int mult1, int mult2);
 
 /** Generate a symmetrohedron with advanced parameters
  * @param geom Handle to geometry object

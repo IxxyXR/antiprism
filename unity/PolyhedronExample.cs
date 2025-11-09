@@ -37,25 +37,21 @@ public class PolyhedronExample : MonoBehaviour
     [Tooltip("Geodesic base polyhedron")]
     public GeodesicMethod geodesicMethod = GeodesicMethod.Icosahedron;
 
-    [Header("Symmetrohedra Settings (Kaplan-Hart notation)")]
+    [Header("Symmetrohedra Settings (Kaplan-Hart notation: -k sym,mult0,mult1,mult2)")]
     [Tooltip("Symmetry: T (tetrahedral), O (octahedral), I (icosahedral)")]
-    public char symmetroSym = 'T';
+    public char symmetroSym = 'O';
 
-    [Tooltip("First Schläfli parameter (p in {p,q})")]
-    [Range(2, 5)]
-    public int symmetroP = 3;
-
-    [Tooltip("Second Schläfli parameter (q in {p,q})")]
-    [Range(2, 5)]
-    public int symmetroQ = 3;
-
-    [Tooltip("Multiplier for first axis (0 = no polygon on this axis)")]
+    [Tooltip("Multiplier for primary axis (axis orders: T=[3,3,2], O=[4,3,2], I=[5,3,2])")]
     [Range(0, 10)]
-    public int symmetroL = 2;
+    public int symmetroMult0 = 1;
 
-    [Tooltip("Multiplier for second axis (0 = no polygon on this axis)")]
+    [Tooltip("Multiplier for secondary axis (0 = skip this axis)")]
     [Range(0, 10)]
-    public int symmetroM = 3;
+    public int symmetroMult1 = 1;
+
+    [Tooltip("Multiplier for tertiary axis (0 = skip this axis)")]
+    [Range(0, 10)]
+    public int symmetroMult2 = 0;
 
     [Header("Indexed Polyhedra Settings")]
     [Tooltip("Johnson solid number (1-92)")]
@@ -308,8 +304,8 @@ public class PolyhedronExample : MonoBehaviour
                 return Geometry.CreateGeodesic(geodesicFrequency, geodesicMethod);
 
             case PolyhedronType.Symmetrohedra:
-                return Geometry.CreateSymmetroKaplanHart(symmetroSym, symmetroP, symmetroQ,
-                                                         symmetroL, symmetroM);
+                return Geometry.CreateSymmetroKaplanHart(symmetroSym, symmetroMult0, symmetroMult1,
+                                                         symmetroMult2);
 
             case PolyhedronType.JohnsonSolid:
                 {

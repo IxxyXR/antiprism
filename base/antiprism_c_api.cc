@@ -1210,7 +1210,7 @@ ANTIPRISM_API AntiStatus anti_make_geodesic(AntiGeometryHandle geom, int frequen
  *---------------------------------------------------------------------------*/
 
 ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
-    AntiGeometryHandle geom, char sym, int p, int q, int l, int m, int sym_id) {
+    AntiGeometryHandle geom, char sym, int mult0, int mult1, int mult2) {
   if (!geom)
     return ANTI_ERROR_INVALID_HANDLE;
 
@@ -1218,20 +1218,56 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
   if (sym != 'T' && sym != 'O' && sym != 'I')
     return ANTI_ERROR_INVALID_HANDLE;
 
-  // Validate parameters
-  if (p < 2 || q < 2 || l < 0 || m < 0 || sym_id < 1)
+  // Validate multipliers (at least one must be non-zero, at most two can be non-zero)
+  if (mult0 < 0 || mult1 < 0 || mult2 < 0)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  int num_multipliers = (mult0 > 0 ? 1 : 0) + (mult1 > 0 ? 1 : 0) + (mult2 > 0 ? 1 : 0);
+  if (num_multipliers == 0 || num_multipliers == 3)
     return ANTI_ERROR_INVALID_HANDLE;
 
   try {
+    // Calculate p and q from multipliers (same logic as CLI tool)
+    // Axis orders for each symmetry: T=[3,3,2], O=[4,3,2], I=[5,3,2]
+    int orders[3];
+    orders[0] = (sym == 'T') ? 3 : ((sym == 'O') ? 4 : 5);
+    orders[1] = 3;
+    orders[2] = 2;
+
+    int p, q;
+    if (num_multipliers == 1) {
+      // Single axis - both p and q are same order
+      if (mult0 > 0) {
+        p = q = orders[0];
+      } else if (mult1 > 0) {
+        p = q = orders[1];
+      } else { // mult2 > 0
+        p = q = orders[2];
+      }
+    } else { // num_multipliers == 2
+      // Two axes - p and q are different orders
+      if (mult0 > 0 && mult1 > 0) {
+        p = orders[0];
+        q = orders[1];
+      } else if (mult0 > 0 && mult2 > 0) {
+        p = orders[0];
+        q = orders[2];
+      } else { // mult1 > 0 && mult2 > 0
+        p = orders[1];
+        q = orders[2];
+      }
+    }
+
     // Create symmetro object
     symmetro symm;
 
     // Set symmetry
-    symm.setSym(sym, p, q, 0, sym_id);
+    symm.setSym(sym, p, q, 0, 1);  // sym_id always 1 for basic usage
 
-    // Set multipliers for each axis
-    symm.setMult(0, l);
-    symm.setMult(1, m);
+    // Set multipliers for all three axes
+    symm.setMult(0, mult0);
+    symm.setMult(1, mult1);
+    symm.setMult(2, mult2);
 
     // Fill symmetry vectors (Kaplan-Hart mode)
     std::string error_msg;
