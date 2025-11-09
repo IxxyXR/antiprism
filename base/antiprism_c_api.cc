@@ -1317,15 +1317,39 @@ ANTIPRISM_API AntiStatus anti_make_symmetro_kaplan_hart(
       return ANTI_ERROR_PARSE;  // No polygons generated
     }
 
-    // Combine the two generated polygons into the output geometry
+    // Initialize symmetry for replication
+    Symmetry symmetry;
+    if (sym == 'T')
+      symmetry.init(Symmetry::T);
+    else if (sym == 'O')
+      symmetry.init(Symmetry::O);
+    else if (sym == 'I')
+      symmetry.init(Symmetry::I);
+
+    // Replicate each polygon across the symmetry to form the complete polyhedron
     Geometry* out_geom = to_geom(geom);
     out_geom->clear_all();
 
     for (const auto& pg : pgeoms) {
       if (pg.verts().size() > 0) {
-        out_geom->append(pg);
+        // Replicate this polygon across all symmetry transformations
+        Geometry replicated;
+        sym_repeat(replicated, pg, symmetry, ELEM_FACES);
+        out_geom->append(replicated);
       }
     }
+
+    // Merge coincident vertices and faces
+    merge_coincident_elements(*out_geom, "vf", 1e-8);
+
+    // Apply convex hull to close any gaps
+    out_geom->add_hull("A1");
+
+    // Merge faces created by convex hull
+    merge_coincident_elements(*out_geom, "f", 1e-8);
+
+    // Orient faces consistently
+    out_geom->orient(1);  // positive orientation
 
     // Verify we have valid geometry
     if (out_geom->verts().size() == 0) {
