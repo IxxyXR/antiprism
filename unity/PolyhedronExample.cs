@@ -387,7 +387,7 @@ public class PolyhedronExample : MonoBehaviour
 
             case ModifierType.Bevel:
                 // Truncate + ambo (chamfer edges and vertices)
-                Status bevelStatus = geom.Bevel(truncateRatio);
+                Status bevelStatus = geom.Bevel(ratio: truncateRatio);
                 if (bevelStatus != Status.OK)
                     Debug.LogWarning($"Bevel operation failed: {bevelStatus}");
                 break;
