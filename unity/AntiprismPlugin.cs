@@ -761,7 +761,7 @@ namespace Antiprism
         public Status Truncate(double ratio = 0.3333)
         {
             CheckDisposed();
-            return anti_conway_truncate(handle, ratio);
+            return anti_geometry_truncate(handle, ratio, 0);
         }
 
         /// <summary>
@@ -770,7 +770,7 @@ namespace Antiprism
         public Status Kis(int faceSides = 0)
         {
             CheckDisposed();
-            return anti_conway_kis(handle, faceSides);
+            return anti_geometry_kis(handle, faceSides);
         }
 
         /// <summary>
@@ -779,7 +779,7 @@ namespace Antiprism
         public Status Ambo()
         {
             CheckDisposed();
-            return anti_conway_ambo(handle);
+            return anti_geometry_ambo(handle);
         }
 
         /// <summary>
@@ -788,7 +788,7 @@ namespace Antiprism
         public Status Gyro()
         {
             CheckDisposed();
-            return anti_conway_gyro(handle);
+            return anti_geometry_gyro(handle, 1);
         }
 
         /// <summary>
@@ -797,7 +797,7 @@ namespace Antiprism
         public Status Join()
         {
             CheckDisposed();
-            return anti_conway_join(handle);
+            return anti_geometry_join(handle);
         }
 
         /// <summary>
@@ -806,7 +806,7 @@ namespace Antiprism
         public Status Needle(double height = 2.0)
         {
             CheckDisposed();
-            return anti_conway_needle(handle, height);
+            return anti_geometry_needle(handle, height);
         }
 
         /// <summary>
@@ -815,7 +815,7 @@ namespace Antiprism
         public Status Zip()
         {
             CheckDisposed();
-            return anti_conway_zip(handle);
+            return anti_geometry_zip(handle);
         }
 
         /// <summary>
@@ -824,7 +824,7 @@ namespace Antiprism
         public Status Subdivide()
         {
             CheckDisposed();
-            return anti_conway_subdivide(handle);
+            return anti_geometry_subdivide(handle, 2, 0);
         }
 
         /// <summary>
@@ -833,7 +833,7 @@ namespace Antiprism
         public Status Expand()
         {
             CheckDisposed();
-            return anti_conway_expand(handle);
+            return anti_geometry_expand(handle, 2, 0);
         }
 
         /// <summary>
@@ -842,7 +842,7 @@ namespace Antiprism
         public Status Meta()
         {
             CheckDisposed();
-            return anti_conway_meta(handle);
+            return anti_geometry_meta(handle, 2);
         }
 
         /// <summary>
@@ -851,7 +851,7 @@ namespace Antiprism
         public Status Bevel(double ratio = 0.3333)
         {
             CheckDisposed();
-            return anti_conway_bevel(handle, ratio);
+            return anti_geometry_bevel(handle, 2, ratio);
         }
 
         /// <summary>
@@ -860,7 +860,7 @@ namespace Antiprism
         public Status Snub()
         {
             CheckDisposed();
-            return anti_conway_snub(handle);
+            return anti_geometry_snub(handle, 2);
         }
 
         /// <summary>
@@ -869,7 +869,7 @@ namespace Antiprism
         public Status Ortho()
         {
             CheckDisposed();
-            return anti_conway_ortho(handle);
+            return anti_geometry_ortho(handle, 2, 0);
         }
 
         // === P/INVOKE DECLARATIONS ===
@@ -923,43 +923,43 @@ namespace Antiprism
 
         // Conway operators
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_truncate(IntPtr geom, double ratio);
+        private static extern Status anti_geometry_truncate(IntPtr geom, double ratio, int order);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_kis(IntPtr geom, int faceSides);
+        private static extern Status anti_geometry_kis(IntPtr geom, int n);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_ambo(IntPtr geom);
+        private static extern Status anti_geometry_ambo(IntPtr geom);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_gyro(IntPtr geom);
+        private static extern Status anti_geometry_gyro(IntPtr geom, int n);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_join(IntPtr geom);
+        private static extern Status anti_geometry_join(IntPtr geom);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_needle(IntPtr geom, double height);
+        private static extern Status anti_geometry_needle(IntPtr geom, double height);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_zip(IntPtr geom);
+        private static extern Status anti_geometry_zip(IntPtr geom);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_subdivide(IntPtr geom);
+        private static extern Status anti_geometry_subdivide(IntPtr geom, int n, int m);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_expand(IntPtr geom);
+        private static extern Status anti_geometry_expand(IntPtr geom, int n, int m);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_meta(IntPtr geom);
+        private static extern Status anti_geometry_meta(IntPtr geom, int n);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_bevel(IntPtr geom, double ratio);
+        private static extern Status anti_geometry_bevel(IntPtr geom, int n, double ratio);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_snub(IntPtr geom);
+        private static extern Status anti_geometry_snub(IntPtr geom, int n);
 
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
-        private static extern Status anti_conway_ortho(IntPtr geom);
+        private static extern Status anti_geometry_ortho(IntPtr geom, int n, int m);
 
         // Parameterized polyhedra generators
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
