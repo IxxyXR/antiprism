@@ -86,7 +86,10 @@ set(ANTIPRISM_SOURCES
 
 # Add C API for Unity plugin
 if(BUILD_UNITY_PLUGIN)
-    list(APPEND ANTIPRISM_SOURCES base/antiprism_c_api.cc)
+    list(APPEND ANTIPRISM_SOURCES
+        base/antiprism_c_api.cc
+        base/symmetro_wrapper.cc
+    )
 endif()
 
 # Public headers
@@ -126,7 +129,10 @@ set(ANTIPRISM_HEADERS
 )
 
 if(BUILD_UNITY_PLUGIN)
-    list(APPEND ANTIPRISM_HEADERS base/antiprism_c_api.h)
+    list(APPEND ANTIPRISM_HEADERS
+        base/antiprism_c_api.h
+        base/symmetro_wrapper.h
+    )
 endif()
 
 # Subdirectories for embedded libraries
