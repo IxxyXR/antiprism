@@ -15,7 +15,7 @@
 
 ### Completed in Current Session
 - [x] Fix Bevel parameter passing (use named parameter for ratio)
-- [x] Add 35+ new polyhedra types to Unity example:
+- [x] Add 35+ new polyhedra types to Unity example (first batch):
   - [x] 4 missing Archimedean solids
   - [x] 4 additional prisms (7, 8, 9, 12 sides)
   - [x] 3 additional antiprisms (6, 8, 10 sides)
@@ -24,6 +24,15 @@
   - [x] 4 Kepler-Poinsot polyhedra (stellated)
   - [x] 3 geodesic spheres
   - [x] 7 Johnson solids
+- [x] Move PolyhedronType, ModifierType enums and GetResourceName to AntiprismPlugin (public API)
+- [x] Add 50+ additional polyhedra types (second batch):
+  - [x] 3 more geodesic spheres (5, 6, 8)
+  - [x] 24 more Johnson solids (cupolae, bicupolae, elongated variants)
+  - [x] 9 more uniform polyhedra (stellated and special forms)
+  - [x] 5 uniform compounds
+  - [x] 6 Wenninger stellations
+  - [x] 4 miscellaneous special polyhedra
+- [x] **Total polyhedra types now available: 110+**
 
 ## Pending Tasks - High Priority
 
@@ -59,14 +68,14 @@
 ## Future Enhancements
 
 ### Additional Polyhedra Generators
-- [ ] Add custom N-sided prism/antiprism/pyramid/dipyramid with inspector parameter
-- [ ] Add more geodesic subdivisions (5, 6, 8, etc.)
-- [ ] Add cupola variants (elongated, gyroelongated)
-- [ ] Add more Johnson solids (92 available total)
-- [ ] Add more uniform polyhedra (80 available total)
-- [ ] Add uniform compounds (75 available)
-- [ ] Add Wenninger stellations
-- [ ] Add zonohedra generators
+- [ ] Add custom N-sided prism/antiprism/pyramid/dipyramid with inspector parameter (requires C API changes)
+- [x] Add more geodesic subdivisions (5, 6, 8) - COMPLETED
+- [x] Add cupola variants (elongated, gyroelongated) - COMPLETED (added j18-j20, j36-j38)
+- [x] Add more Johnson solids (92 available total) - COMPLETED (added 24 more: j7, j9, j11, j18-j20, j27-j38, j85, j92)
+- [x] Add more uniform polyhedra (80 available total) - COMPLETED (added 9 more: u4, u15, u17, u18, u21, u37, u38, u54, u55)
+- [x] Add uniform compounds (75 available) - COMPLETED (added 5 famous ones: uc1-uc5)
+- [x] Add Wenninger stellations - COMPLETED (added 6: w1, w2, w3, w9, w20, w22)
+- [ ] Add zonohedra generators (requires C API for custom vectors)
 
 ### Conway Operator Enhancements
 - [ ] Implement actual parameter behavior for operators (not just reserved)
