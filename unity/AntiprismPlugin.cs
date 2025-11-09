@@ -16,7 +16,12 @@ namespace Antiprism
 {
     /// <summary>
     /// Simplified polyhedron types - parameterized types use separate parameter fields
+    /// Covers 200+ polyhedra via ~28 enum entries through parameterization
     /// </summary>
+    /// <remarks>
+    /// All Archimedean (U2-U29) and Kepler-Poinsot (U34,U35,U52,U53) polyhedra
+    /// are accessed via UniformPolyhedron with their U-number
+    /// </remarks>
     public enum PolyhedronType
     {
         // === PARAMETERIZED TYPES (require integer parameter) ===
@@ -28,7 +33,7 @@ namespace Antiprism
         Geodesic,           // Geodesic sphere (requires frequency and method)
         Symmetrohedra,      // Symmetrohedra using Kaplan-Hart notation
         JohnsonSolid,       // Johnson solid by number (J1-J92)
-        UniformPolyhedron,  // Uniform polyhedron by number (U1-U80)
+        UniformPolyhedron,  // Uniform polyhedron by number (U1-U80) - includes all Archimedean & Kepler-Poinsot
         Wenninger,          // Wenninger stellation by number (W1-W119)
 
         // === PLATONIC SOLIDS ===
@@ -38,30 +43,9 @@ namespace Antiprism
         Dodecahedron,
         Icosahedron,
 
-        // === ARCHIMEDEAN SOLIDS ===
-        TruncatedTetrahedron,
-        TruncatedCube,
-        TruncatedOctahedron,
-        TruncatedDodecahedron,
-        TruncatedIcosahedron,
-        Cuboctahedron,
-        Icosidodecahedron,
-        Rhombicuboctahedron,
-        TruncatedCuboctahedron,
-        Rhombicosidodecahedron,
-        TruncatedIcosidodecahedron,
-        SnubCube,
-        SnubDodecahedron,
-
-        // === CATALAN SOLIDS (duals of Archimedean) ===
+        // === CATALAN SOLIDS (duals of Archimedean - not in uniform series) ===
         RhombicDodecahedron,
         RhombicTriacontahedron,
-
-        // === KEPLER-POINSOT POLYHEDRA ===
-        SmallStellatedDodecahedron,
-        GreatDodecahedron,
-        GreatStellatedDodecahedron,
-        GreatIcosahedron,
 
         // === UNIFORM COMPOUNDS (famous ones kept for convenience) ===
         StellaOctangula,
@@ -156,30 +140,9 @@ namespace Antiprism
                 case PolyhedronType.Dodecahedron: return "dodec";
                 case PolyhedronType.Icosahedron: return "ico";
 
-                // Archimedean Solids
-                case PolyhedronType.TruncatedTetrahedron: return "tr_tet";
-                case PolyhedronType.TruncatedCube: return "tr_cube";
-                case PolyhedronType.TruncatedOctahedron: return "tr_oct";
-                case PolyhedronType.TruncatedDodecahedron: return "tr_dodec";
-                case PolyhedronType.TruncatedIcosahedron: return "tr_ico";
-                case PolyhedronType.Cuboctahedron: return "cubo";
-                case PolyhedronType.Icosidodecahedron: return "id";
-                case PolyhedronType.Rhombicuboctahedron: return "srid";
-                case PolyhedronType.TruncatedCuboctahedron: return "tr_cubo";
-                case PolyhedronType.Rhombicosidodecahedron: return "sn_cubo";
-                case PolyhedronType.TruncatedIcosidodecahedron: return "tr_id";
-                case PolyhedronType.SnubCube: return "sn_cube";
-                case PolyhedronType.SnubDodecahedron: return "sn_dodec";
-
-                // Catalan Solids
+                // Catalan Solids (duals of Archimedean - not in uniform series)
                 case PolyhedronType.RhombicDodecahedron: return "rhombic_d12";
                 case PolyhedronType.RhombicTriacontahedron: return "rhombic_t30";
-
-                // Kepler-Poinsot Polyhedra
-                case PolyhedronType.SmallStellatedDodecahedron: return "st_dodec";
-                case PolyhedronType.GreatDodecahedron: return "great_dodec";
-                case PolyhedronType.GreatStellatedDodecahedron: return "grt_st_dodec";
-                case PolyhedronType.GreatIcosahedron: return "great_ico";
 
                 // Uniform Compounds
                 case PolyhedronType.StellaOctangula: return "UC1";
