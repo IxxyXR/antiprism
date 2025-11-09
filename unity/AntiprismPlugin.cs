@@ -435,6 +435,86 @@ namespace Antiprism
         }
 
         /// <summary>
+        /// Create a zonohedron from a star of vectors
+        /// </summary>
+        /// <param name="starVectors">Star of vectors defining the zones</param>
+        /// <returns>New Geometry containing the zonohedron</returns>
+        public static Geometry CreateZonohedron(Vector3[] starVectors)
+        {
+            if (starVectors == null || starVectors.Length < 1)
+                throw new ArgumentException("Star must contain at least one vector");
+
+            // Flatten Vector3[] to double[]
+            double[] flatVectors = new double[starVectors.Length * 3];
+            for (int i = 0; i < starVectors.Length; i++)
+            {
+                flatVectors[i * 3 + 0] = starVectors[i].x;
+                flatVectors[i * 3 + 1] = starVectors[i].y;
+                flatVectors[i * 3 + 2] = starVectors[i].z;
+            }
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_zonohedron(geom.handle, flatVectors, starVectors.Length);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create zonohedron: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create a polar zonohedron from an ordered star of vectors
+        /// </summary>
+        /// <param name="starVectors">Ordered star of vectors</param>
+        /// <param name="step">Step this many places to get to next vector (default: 1)</param>
+        /// <param name="spiralStep">Step between ridges of spirallohedron, 0 for regular (default: 0)</param>
+        /// <returns>New Geometry containing the polar zonohedron</returns>
+        public static Geometry CreatePolarZonohedron(Vector3[] starVectors, int step = 1, int spiralStep = 0)
+        {
+            if (starVectors == null || starVectors.Length < 1)
+                throw new ArgumentException("Star must contain at least one vector");
+
+            if (step < 1)
+                throw new ArgumentException("Step must be >= 1");
+
+            // Flatten Vector3[] to double[]
+            double[] flatVectors = new double[starVectors.Length * 3];
+            for (int i = 0; i < starVectors.Length; i++)
+            {
+                flatVectors[i * 3 + 0] = starVectors[i].x;
+                flatVectors[i * 3 + 1] = starVectors[i].y;
+                flatVectors[i * 3 + 2] = starVectors[i].z;
+            }
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_polar_zonohedron(geom.handle, flatVectors, starVectors.Length, step, spiralStep);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create polar zonohedron: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create a zonohedron from the vertices of a seed polyhedron
+        /// </summary>
+        /// <param name="seed">Seed polyhedron whose vertices define the star</param>
+        /// <returns>New Geometry containing the zonohedron</returns>
+        /// <remarks>
+        /// Examples:
+        /// - Cube vertices → Rhombic Dodecahedron
+        /// - Dodecahedron vertices → Rhombic Triacontahedron
+        /// - Icosahedron vertices → Rhombic Hexecontahedron
+        /// </remarks>
+        public static Geometry CreateZonohedronFromVertices(Geometry seed)
+        {
+            if (seed == null)
+                throw new ArgumentNullException(nameof(seed));
+
+            // Use vertices as star
+            Vector3[] star = seed.GetVertices();
+            return CreateZonohedron(star);
+        }
+
+        /// <summary>
         /// Load a built-in polyhedron (e.g., "cube", "tet", "ico", "dodec")
         /// </summary>
         public Status LoadResource(string name)
@@ -940,5 +1020,13 @@ namespace Antiprism
         private static extern Status anti_make_symmetro_advanced(
             IntPtr geom, char sym, int p, int q, int l, int m,
             int d0, int d1, double rotation, int sym_id);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_zonohedron(
+            IntPtr geom, double[] star_vectors, int num_vectors);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_polar_zonohedron(
+            IntPtr geom, double[] star_vectors, int num_vectors, int step, int spiral_step);
     }
 }

@@ -91,6 +91,10 @@ public class PolyhedronExample : MonoBehaviour
     [Range(0.1f, 3.0f)]
     public float dualRadius = 1.0f;
 
+    [Header("Zonohedra")]
+    [Tooltip("Create zonohedron from vertices (e.g., Cube→Rhombic Dodecahedron)")]
+    public bool createZonohedronFromVertices = false;
+
     [Header("Rendering")]
     [Tooltip("Use flat shading (hard edges) - recommended for polyhedra")]
     public bool flatShading = true;
@@ -233,31 +237,48 @@ public class PolyhedronExample : MonoBehaviour
         {
             using (var geom = CreateBasePolyhedron())
             {
-                // Apply modifier
-                ApplyModifier(geom);
-
-                // Normalize to unit sphere
-                geom.Unitize();
-
-                // Scale
-                if (scale != 1.0f)
+                // Apply zonohedron transformation if enabled
+                if (createZonohedronFromVertices)
                 {
-                    geom.Scale(scale);
+                    using (var zonoGeom = Geometry.CreateZonohedronFromVertices(geom))
+                    {
+                        ApplyTransformationsAndRender(zonoGeom);
+                    }
                 }
-
-                // Orient faces consistently
-                geom.Orient();
-
-                // Apply to Unity mesh with flat or smooth shading
-                geom.ApplyToMesh(mesh, flatShading);
-
-                Debug.Log($"Generated {polyhedronType} ({modifier}): {geom.VertexCount} vertices, {geom.FaceCount} faces");
+                else
+                {
+                    ApplyTransformationsAndRender(geom);
+                }
             }
         }
         catch (System.Exception e)
         {
             Debug.LogError($"Failed to generate polyhedron: {e.Message}");
         }
+    }
+
+    void ApplyTransformationsAndRender(Geometry geom)
+    {
+        // Apply modifier
+        ApplyModifier(geom);
+
+        // Normalize to unit sphere
+        geom.Unitize();
+
+        // Scale
+        if (scale != 1.0f)
+        {
+            geom.Scale(scale);
+        }
+
+        // Orient faces consistently
+        geom.Orient();
+
+        // Apply to Unity mesh with flat or smooth shading
+        geom.ApplyToMesh(mesh, flatShading);
+
+        string zonoSuffix = createZonohedronFromVertices ? " [Zonohedron]" : "";
+        Debug.Log($"Generated {polyhedronType}{zonoSuffix} ({modifier}): {geom.VertexCount} vertices, {geom.FaceCount} faces");
     }
 
     /// <summary>
