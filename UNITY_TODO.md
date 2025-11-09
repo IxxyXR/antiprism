@@ -1,5 +1,16 @@
 # Unity Plugin TODO List
 
+## CRITICAL CONSTRAINTS
+
+### Integration Rules - READ FIRST
+1. **ALL calls must be at native C level** - NEVER use CLI bridge, shell execution, or process spawning
+2. **NEVER modify core Antiprism code** - We are writing wrappers, not changing the parent library
+3. **Wrapper-only approach**:
+   - Create new C API wrapper files (base/antiprism_c_api_*.h/cc)
+   - Link to existing Antiprism base library functions
+   - For standalone programs (src/*.cc), extract reusable classes/functions to new wrapper files
+   - Keep original src/ files completely untouched
+
 ## CRITICAL - Core Integration Tasks
 
 ### Integrate All Standalone Programs into Unity Plugin
