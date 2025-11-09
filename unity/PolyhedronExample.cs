@@ -57,6 +57,19 @@ public class PolyhedronExample : MonoBehaviour
     [Range(0, 10)]
     public int symmetroM = 3;
 
+    [Header("Indexed Polyhedra Settings")]
+    [Tooltip("Johnson solid number (1-92)")]
+    [Range(1, 92)]
+    public int johnsonNumber = 6;
+
+    [Tooltip("Uniform polyhedron number (1-80)")]
+    [Range(1, 80)]
+    public int uniformNumber = 4;
+
+    [Tooltip("Wenninger stellation number (1-119)")]
+    [Range(1, 119)]
+    public int wenningerNumber = 1;
+
     [Header("Modifiers")]
     [Tooltip("Apply a modifier operation")]
     public ModifierType modifier = ModifierType.None;
@@ -270,17 +283,63 @@ public class PolyhedronExample : MonoBehaviour
             case PolyhedronType.Cupola:
                 return Geometry.CreateCupola(sides);
 
+            case PolyhedronType.Geodesic:
+                return Geometry.CreateGeodesic(geodesicFrequency, geodesicMethod);
+
+            case PolyhedronType.Symmetrohedra:
+                return Geometry.CreateSymmetroKaplanHart(symmetroSym, symmetroP, symmetroQ,
+                                                         symmetroL, symmetroM);
+
+            case PolyhedronType.JohnsonSolid:
+                {
+                    var geom = new Geometry();
+                    string resourceName = $"J{johnsonNumber}";
+                    Status status = geom.LoadResource(resourceName);
+                    if (status != Status.OK)
+                    {
+                        geom.Dispose();
+                        throw new System.Exception($"Failed to load Johnson solid '{resourceName}': {status}");
+                    }
+                    return geom;
+                }
+
+            case PolyhedronType.UniformPolyhedron:
+                {
+                    var geom = new Geometry();
+                    string resourceName = $"U{uniformNumber}";
+                    Status status = geom.LoadResource(resourceName);
+                    if (status != Status.OK)
+                    {
+                        geom.Dispose();
+                        throw new System.Exception($"Failed to load Uniform polyhedron '{resourceName}': {status}");
+                    }
+                    return geom;
+                }
+
+            case PolyhedronType.Wenninger:
+                {
+                    var geom = new Geometry();
+                    string resourceName = $"W{wenningerNumber}";
+                    Status status = geom.LoadResource(resourceName);
+                    if (status != Status.OK)
+                    {
+                        geom.Dispose();
+                        throw new System.Exception($"Failed to load Wenninger stellation '{resourceName}': {status}");
+                    }
+                    return geom;
+                }
+
             default:
                 // Non-parameterized type - load from resource
-                var geom = new Geometry();
-                string resourceName = AntiprismPlugin.GetResourceName(polyhedronType);
-                Status status = geom.LoadResource(resourceName);
-                if (status != Status.OK)
+                var defaultGeom = new Geometry();
+                string defaultResourceName = AntiprismPlugin.GetResourceName(polyhedronType);
+                Status defaultStatus = defaultGeom.LoadResource(defaultResourceName);
+                if (defaultStatus != Status.OK)
                 {
-                    geom.Dispose();
-                    throw new System.Exception($"Failed to load polyhedron '{resourceName}': {status}");
+                    defaultGeom.Dispose();
+                    throw new System.Exception($"Failed to load polyhedron '{defaultResourceName}': {defaultStatus}");
                 }
-                return geom;
+                return defaultGeom;
         }
     }
 
