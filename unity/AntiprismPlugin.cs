@@ -747,15 +747,18 @@ namespace Antiprism
         /// <summary>
         /// Conway Truncate operator
         /// </summary>
-        public Status Truncate(double ratio = 0.3333)
+        /// <param name="ratio">Truncation ratio (0.0-1.0, typically 0.333)</param>
+        /// <param name="order">Truncate only vertices with this order (0 for all)</param>
+        public Status Truncate(double ratio = 0.3333, int order = 0)
         {
             CheckDisposed();
-            return anti_geometry_truncate(handle, ratio, 0);
+            return anti_geometry_truncate(handle, ratio, order);
         }
 
         /// <summary>
         /// Conway Kis operator (place pyramid on each face)
         /// </summary>
+        /// <param name="faceSides">Only kis faces with n sides (0 for all faces, 3 for triangles, 4 for quads, etc.)</param>
         public Status Kis(int faceSides = 0)
         {
             CheckDisposed();
@@ -774,10 +777,11 @@ namespace Antiprism
         /// <summary>
         /// Conway Gyro operator (rotate and subdivide faces)
         /// </summary>
-        public Status Gyro()
+        /// <param name="n">Gyro subscript parameter (default 1)</param>
+        public Status Gyro(int n = 1)
         {
             CheckDisposed();
-            return anti_geometry_gyro(handle, 1);
+            return anti_geometry_gyro(handle, n);
         }
 
         /// <summary>
@@ -792,6 +796,7 @@ namespace Antiprism
         /// <summary>
         /// Conway Needle operator (elongated kis)
         /// </summary>
+        /// <param name="height">Height multiplier for needle points (default 2.0)</param>
         public Status Needle(double height = 2.0)
         {
             CheckDisposed();
@@ -810,55 +815,65 @@ namespace Antiprism
         /// <summary>
         /// Conway Subdivide operator
         /// </summary>
-        public Status Subdivide()
+        /// <param name="n">First subscript parameter (default 2)</param>
+        /// <param name="m">Second subscript parameter (default 0)</param>
+        public Status Subdivide(int n = 2, int m = 0)
         {
             CheckDisposed();
-            return anti_geometry_subdivide(handle, 2, 0);
+            return anti_geometry_subdivide(handle, n, m);
         }
 
         /// <summary>
         /// Conway Expand operator (ambo + ambo)
         /// </summary>
-        public Status Expand()
+        /// <param name="n">First subscript parameter (default 2)</param>
+        /// <param name="m">Second subscript parameter (default 0)</param>
+        public Status Expand(int n = 2, int m = 0)
         {
             CheckDisposed();
-            return anti_geometry_expand(handle, 2, 0);
+            return anti_geometry_expand(handle, n, m);
         }
 
         /// <summary>
         /// Conway Meta operator (kis + dual)
         /// </summary>
-        public Status Meta()
+        /// <param name="n">Meta subscript parameter (default 2)</param>
+        public Status Meta(int n = 2)
         {
             CheckDisposed();
-            return anti_geometry_meta(handle, 2);
+            return anti_geometry_meta(handle, n);
         }
 
         /// <summary>
         /// Conway Bevel operator (truncate + ambo)
         /// </summary>
-        public Status Bevel(double ratio = 0.3333)
+        /// <param name="n">Bevel subscript parameter (default 2)</param>
+        /// <param name="ratio">Truncation ratio (0.0-1.0, typically 0.333)</param>
+        public Status Bevel(int n = 2, double ratio = 0.3333)
         {
             CheckDisposed();
-            return anti_geometry_bevel(handle, 2, ratio);
+            return anti_geometry_bevel(handle, n, ratio);
         }
 
         /// <summary>
         /// Conway Snub operator (dual + gyro)
         /// </summary>
-        public Status Snub()
+        /// <param name="n">Snub subscript parameter (default 2)</param>
+        public Status Snub(int n = 2)
         {
             CheckDisposed();
-            return anti_geometry_snub(handle, 2);
+            return anti_geometry_snub(handle, n);
         }
 
         /// <summary>
         /// Conway Ortho operator (join + join)
         /// </summary>
-        public Status Ortho()
+        /// <param name="n">First subscript parameter (default 2)</param>
+        /// <param name="m">Second subscript parameter (default 0)</param>
+        public Status Ortho(int n = 2, int m = 0)
         {
             CheckDisposed();
-            return anti_geometry_ortho(handle, 2, 0);
+            return anti_geometry_ortho(handle, n, m);
         }
 
         // === P/INVOKE DECLARATIONS ===

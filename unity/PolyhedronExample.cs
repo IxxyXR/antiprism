@@ -23,7 +23,7 @@ public class PolyhedronExample : MonoBehaviour
 {
     [Header("Polyhedron Generator")]
     [Tooltip("Type of polyhedron to display")]
-    public PolyhedronType polyhedronType = PolyhedronType.Icosahedron;
+    public PolyhedronType polyhedronType = PolyhedronType.UniformPolyhedron;
 
     [Header("Parameterized Type Settings")]
     [Tooltip("Number of sides for Prism/Antiprism/Pyramid/Dipyramid (n >= 3) or Cupola (n >= 2)")]
@@ -75,7 +75,11 @@ public class PolyhedronExample : MonoBehaviour
     [Range(0.1f, 0.9f)]
     public float truncateRatio = 0.3333f;
 
-    [Tooltip("Kis face sides (0 = all faces, 3 = triangles only, 4 = quads only, etc.)")]
+    [Tooltip("Truncate vertex order filter (0 = all vertices, 3 = order-3 only, etc.)")]
+    [Range(0, 10)]
+    public int truncateOrder = 0;
+
+    [Tooltip("Kis face sides filter (0 = all faces, 3 = triangles only, 4 = quads only, etc.)")]
     [Range(0, 10)]
     public int kisFaceSides = 0;
 
@@ -86,6 +90,14 @@ public class PolyhedronExample : MonoBehaviour
     [Tooltip("Dual reciprocation radius (affects size/shape of dual)")]
     [Range(0.1f, 3.0f)]
     public float dualRadius = 1.0f;
+
+    [Tooltip("Conway subscript parameter n (for Gyro, Meta, Bevel, Snub, Expand, Subdivide, Ortho)")]
+    [Range(0, 10)]
+    public int conwayN = 2;
+
+    [Tooltip("Conway subscript parameter m (for Expand, Subdivide, Ortho)")]
+    [Range(0, 10)]
+    public int conwayM = 0;
 
     [Header("Zonohedra")]
     [Tooltip("Create zonohedron from vertices (e.g., Cube→Rhombic Dodecahedron)")]
@@ -424,7 +436,7 @@ public class PolyhedronExample : MonoBehaviour
 
             case ModifierType.Truncate:
                 // Truncate vertices (cut off corners)
-                Status truncStatus = geom.Truncate(truncateRatio);
+                Status truncStatus = geom.Truncate(truncateRatio, truncateOrder);
                 if (truncStatus != Status.OK)
                     Debug.LogWarning($"Truncate operation failed: {truncStatus}");
                 break;
@@ -445,7 +457,7 @@ public class PolyhedronExample : MonoBehaviour
 
             case ModifierType.Gyro:
                 // Rotate and subdivide faces
-                Status gyroStatus = geom.Gyro();
+                Status gyroStatus = geom.Gyro(conwayN);
                 if (gyroStatus != Status.OK)
                     Debug.LogWarning($"Gyro operation failed: {gyroStatus}");
                 break;
@@ -473,42 +485,42 @@ public class PolyhedronExample : MonoBehaviour
 
             case ModifierType.Subdivide:
                 // Subdivide faces into smaller quads
-                Status subdivideStatus = geom.Subdivide();
+                Status subdivideStatus = geom.Subdivide(conwayN, conwayM);
                 if (subdivideStatus != Status.OK)
                     Debug.LogWarning($"Subdivide operation failed: {subdivideStatus}");
                 break;
 
             case ModifierType.Expand:
                 // Double ambo (separates faces)
-                Status expandStatus = geom.Expand();
+                Status expandStatus = geom.Expand(conwayN, conwayM);
                 if (expandStatus != Status.OK)
                     Debug.LogWarning($"Expand operation failed: {expandStatus}");
                 break;
 
             case ModifierType.Meta:
                 // Kis + dual (complex stellated form)
-                Status metaStatus = geom.Meta();
+                Status metaStatus = geom.Meta(conwayN);
                 if (metaStatus != Status.OK)
                     Debug.LogWarning($"Meta operation failed: {metaStatus}");
                 break;
 
             case ModifierType.Bevel:
                 // Truncate + ambo (chamfer edges and vertices)
-                Status bevelStatus = geom.Bevel(ratio: truncateRatio);
+                Status bevelStatus = geom.Bevel(conwayN, truncateRatio);
                 if (bevelStatus != Status.OK)
                     Debug.LogWarning($"Bevel operation failed: {bevelStatus}");
                 break;
 
             case ModifierType.Snub:
                 // Dual + gyro (creates twisted form)
-                Status snubStatus = geom.Snub();
+                Status snubStatus = geom.Snub(conwayN);
                 if (snubStatus != Status.OK)
                     Debug.LogWarning($"Snub operation failed: {snubStatus}");
                 break;
 
             case ModifierType.Ortho:
                 // Join + join (double join operation)
-                Status orthoStatus = geom.Ortho();
+                Status orthoStatus = geom.Ortho(conwayN, conwayM);
                 if (orthoStatus != Status.OK)
                     Debug.LogWarning($"Ortho operation failed: {orthoStatus}");
                 break;
