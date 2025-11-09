@@ -527,6 +527,35 @@ ANTIPRISM_API AntiStatus anti_make_unitile2d(
     double width, double height, double minor_radius, double major_radius);
 
 /*---------------------------------------------------------------------------
+ * Kite-Faced Polyhedra Generators (iso_kite)
+ *---------------------------------------------------------------------------*/
+
+/** Generate an isohedral kite-faced polyhedron from a Schwarz triangle model
+ * @param geom Handle to geometry object
+ * @param model_name Schwarz triangle model name:
+ *                   T1, T2 (tetrahedral), O1, O2, O2B (octahedral),
+ *                   I1-I10 (icosahedral variants)
+ * @param height_a Height of kite apex on OA (0 = calculate automatically)
+ * @param height_b Height of kite apex on OB (0 = calculate automatically)
+ * @param height_c Height of kite side vertex on OC (0 = calculate automatically)
+ * @return Status code */
+ANTIPRISM_API AntiStatus anti_make_iso_kite(
+    AntiGeometryHandle geom, const char* model_name,
+    double height_a, double height_b, double height_c);
+
+/** Generate a trapezohedron (kite-faced dipyramid)
+ * @param geom Handle to geometry object
+ * @param n Numerator of fraction (n >= 2)
+ * @param d Denominator of fraction (0 < d < n)
+ * @param height_a Height of kite apex on OA (0 = use default 1.0)
+ * @param height_b Height of kite apex on OB (0 = use default 1.0)
+ * @return Status code
+ * @note Creates a trapezohedron based on fraction n/d */
+ANTIPRISM_API AntiStatus anti_make_trapezohedron(
+    AntiGeometryHandle geom, int n, int d,
+    double height_a, double height_b);
+
+/*---------------------------------------------------------------------------
  * Geometry Information
  *---------------------------------------------------------------------------*/
 

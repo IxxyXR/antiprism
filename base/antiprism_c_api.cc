@@ -27,6 +27,8 @@
 #include "geometryutils.h"
 #include "symmetro_wrapper.h"
 #include "iteration.h"
+#include "tiling.h"
+#include "polygon.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -383,6 +385,105 @@ namespace {
       double r = ring_rad + vert[1] * sect_rad * cos(a0 / 2);
       vert = Vec3d(r * cos(a0), r * sin(a0), vert[1] * sect_rad * sin(a0 / 2));
     }
+  }
+
+  // iso_kite helper functions - creating kite-faced polyhedra
+  bool get_C(const Vec3d &A, const Vec3d &B, Vec3d &C) {
+    Vec3d n = nearest_point(Vec3d(0, 0, 0), A, B);
+    C = line_plane_intersect(A, n, Vec3d(0, 0, 0), C);
+    for (int i = 0; i < 3; i++)
+      if (std::isnan(C[i]))
+        return false;
+    return true;
+  }
+
+  bool get_B(const Vec3d &A, Vec3d &B, const Vec3d &C, const Vec3d &norm_AB) {
+    Vec3d pivot = (C + Trans3d::reflection(norm_AB) * C) / 2;
+    if (vcross((A - pivot).unit(), B.unit()).len() > epsilon)
+      B = lines_intersection(A, pivot, Vec3d(0, 0, 0), B, 0);
+    else
+      B *= (A.len() + C.len()) * 10000;
+    for (int i = 0; i < 3; i++)
+      if (std::isnan(B[i]))
+        return false;
+    return true;
+  }
+
+  bool triangle_to_kite(const std::vector<Vec3d> &tri_verts, std::vector<Vec3d> &kite,
+                        unsigned int hts_set, double hts[], std::vector<double> *hts_used) {
+    Vec3d A = tri_verts[0].unit();
+    if (hts_set & 1)
+      A *= hts[0];
+    else
+      A *= 0.9;
+    Vec3d B = tri_verts[1].unit();
+    if (hts_set & 2)
+      B *= hts[1];
+    else
+      B *= 1.3;
+    Vec3d C = tri_verts[2].unit();
+    if (hts_set & 4)
+      C *= hts[2];
+
+    Vec3d norm_AB = vcross(tri_verts[0], tri_verts[1]);
+
+    int ret = false;
+    if (!(hts_set & 4))
+      ret = get_C(A, B, C);
+    else if (hts_set == 4 || hts_set == 5)
+      ret = get_B(A, B, C, norm_AB);
+    else if (hts_set == 6) {
+      ret = get_B(B, A, C, norm_AB);
+      C = Trans3d::reflection(norm_AB) * C;
+    }
+
+    kite.resize(4);
+    kite[0] = A;
+    kite[1] = C;
+    kite[2] = B;
+    kite[3] = Trans3d::reflection(norm_AB) * C;
+
+    hts_used->resize(3);
+    (*hts_used)[0] = vdot(kite[0], tri_verts[0]);
+    (*hts_used)[1] = vdot(kite[2], tri_verts[1]);
+    (*hts_used)[2] = vdot((hts_set == 6) ? kite[3] : kite[1], tri_verts[2]);
+
+    return ret;
+  }
+
+  // Parse Schwarz triangle model names like "T1", "O1", "I1"
+  bool parse_schwarz_model(const char* model_name, std::vector<int> &fracs) {
+    // Schwarz triangle models: T1, T2, O1, O2, O2B, I1-I10
+    struct ModelDef {
+      const char* name;
+      int f[6];  // A_num, A_den, B_num, B_den, C_num, C_den
+    };
+
+    // clang-format off
+    static const ModelDef models[] = {
+      {"T1",  {3,1, 3,1, 2,1}},  {"T2",  {3,1, 3,2, 2,1}},
+      {"O1",  {4,1, 3,1, 2,1}},  {"O2",  {4,3, 4,1, 3,1}},  {"O2B", {4,1, 3,1, 4,3}},
+      {"I1",  {5,1, 3,1, 2,1}},  {"I2",  {5,2, 3,1, 2,1}},
+      {"I3",  {5,2, 5,1, 2,1}},  {"I4",  {5,2, 3,1, 3,1}},  {"I4B", {3,1, 5,2, 3,1}},
+      {"I5",  {5,4, 3,1, 3,1}},  {"I5B", {3,1, 5,4, 3,1}},
+      {"I6",  {5,3, 5,1, 3,1}},  {"I6B", {5,1, 5,3, 3,1}},  {"I6C", {5,1, 3,1, 5,3}},
+      {"I7",  {5,4, 5,1, 3,1}},  {"I7B", {5,1, 5,4, 3,1}},
+      {"I8",  {5,3, 5,2, 3,1}},  {"I8B", {5,2, 5,3, 3,1}},
+      {"I9",  {5,4, 5,1, 5,1}},  {"I9B", {5,1, 5,4, 5,1}},
+      {"I10", {5,2, 5,2, 5,2}},
+      {nullptr, {0,0, 0,0, 0,0}}
+    };
+    // clang-format on
+
+    for (int i = 0; models[i].name != nullptr; i++) {
+      if (strcmp(model_name, models[i].name) == 0) {
+        fracs.resize(6);
+        for (int j = 0; j < 6; j++)
+          fracs[j] = models[i].f[j];
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -1872,6 +1973,114 @@ ANTIPRISM_API AntiStatus anti_make_unitile2d(
     // Copy result to output geometry
     Geometry* out_geom = to_geom(geom);
     *out_geom = tile;  // Copy the generated tiling
+
+    if (out_geom->verts().size() == 0)
+      return ANTI_ERROR_UNKNOWN;
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+/*---------------------------------------------------------------------------
+ * Kite-Faced Polyhedra Generators
+ *---------------------------------------------------------------------------*/
+
+ANTIPRISM_API AntiStatus anti_make_iso_kite(
+    AntiGeometryHandle geom, const char* model_name,
+    double height_a, double height_b, double height_c) {
+  if (!geom || !model_name)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Parse model name to get Schwarz triangle fractions
+    std::vector<int> fracs;
+    if (!parse_schwarz_model(model_name, fracs))
+      return ANTI_ERROR_PARSE;
+
+    // Get Schwarz triangle vertices
+    std::vector<Vec3d> schwarz_verts;
+    Symmetry sym;
+    if (!get_schwarz_tri_verts(fracs, schwarz_verts, &sym))
+      return ANTI_ERROR_PARSE;
+
+    // Set up height parameters
+    unsigned int hts_set = 0;
+    double hts[3] = {1.0, 1.0, 1.0};
+    if (height_a > 0) { hts[0] = height_a; hts_set |= 1; }
+    if (height_b > 0) { hts[1] = height_b; hts_set |= 2; }
+    if (height_c > 0) { hts[2] = height_c; hts_set |= 4; }
+
+    // Create kite from triangle
+    std::vector<Vec3d> kite_verts;
+    std::vector<double> hts_used;
+    if (!triangle_to_kite(schwarz_verts, kite_verts, hts_set, hts, &hts_used))
+      return ANTI_ERROR_UNKNOWN;
+
+    // Create kite geometry
+    Geometry kite_geom;
+    kite_geom.raw_verts() = kite_verts;
+    kite_geom.add_face({0, 1, 2, 3});
+
+    // Repeat kite with symmetry
+    Geometry* out_geom = to_geom(geom);
+    out_geom->clear_all();
+    sym_repeat(*out_geom, kite_geom, sym);
+
+    if (out_geom->verts().size() == 0)
+      return ANTI_ERROR_UNKNOWN;
+
+    return ANTI_OK;
+  }
+  catch (...) {
+    return ANTI_ERROR_UNKNOWN;
+  }
+}
+
+ANTIPRISM_API AntiStatus anti_make_trapezohedron(
+    AntiGeometryHandle geom, int n, int d,
+    double height_a, double height_b) {
+  if (!geom)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  // Validate fraction
+  if (n < 2 || d <= 0 || d >= n)
+    return ANTI_ERROR_INVALID_HANDLE;
+
+  try {
+    // Create trapezohedron using Polygon class
+    Polygon trap(n, d, Polygon::antiprism, Polygon::sub_antiprism_trapezohedron);
+    Geometry base_geom;
+    trap.make_poly(base_geom);
+
+    // Apply height scaling
+    const std::vector<Vec3d> &verts = base_geom.verts();
+    int A_idx = 2 * n + 1;  // apex
+    int B_idx = n + 1;       // base vertex
+
+    // Default scaling to make it a bit squashed
+    double z_scale = 0.5 * verts[B_idx].len() / verts[A_idx][2];
+
+    if (height_a > 0)
+      z_scale = height_a / verts[A_idx][2];
+
+    base_geom.transform(Trans3d::scale(1, 1, z_scale));
+
+    if (height_b > 0) {
+      // Adjust XY scaling to match height_b
+      double xy_rad = Vec3d(verts[1][0], verts[1][1], 0).len();
+      double root = height_b * height_b - verts[1][2] * verts[1][2];
+      if (root < 0 || xy_rad == 0)
+        return ANTI_ERROR_INVALID_HANDLE;
+      double xy_scale = sqrt(root) / xy_rad;
+      base_geom.transform(Trans3d::scale(xy_scale, xy_scale, 1));
+    }
+
+    // Copy to output
+    Geometry* out_geom = to_geom(geom);
+    *out_geom = base_geom;
 
     if (out_geom->verts().size() == 0)
       return ANTI_ERROR_UNKNOWN;

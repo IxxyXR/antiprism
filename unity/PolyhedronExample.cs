@@ -60,6 +60,39 @@ public class PolyhedronExample : MonoBehaviour
     [Range(1.0f, 10.0f)]
     public float tilingMajorRadius = 3.0f;
 
+    [Header("Iso_Kite Settings (Kite-faced polyhedra)")]
+    [Tooltip("Schwarz triangle model (T1,T2, O1,O2, I1-I10)")]
+    public SchwarzTriangle isoKiteModel = SchwarzTriangle.I1;
+
+    [Tooltip("Height of kite apex on OA (0 = auto-calculate)")]
+    [Range(0, 3.0f)]
+    public float isoKiteHeightA = 0;
+
+    [Tooltip("Height of kite apex on OB (0 = auto-calculate)")]
+    [Range(0, 3.0f)]
+    public float isoKiteHeightB = 0;
+
+    [Tooltip("Height of kite side vertex on OC (0 = auto-calculate)")]
+    [Range(0, 3.0f)]
+    public float isoKiteHeightC = 0;
+
+    [Header("Trapezohedron Settings (Kite-faced dipyramid)")]
+    [Tooltip("Numerator of fraction (n/d)")]
+    [Range(2, 20)]
+    public int trapezohedronN = 5;
+
+    [Tooltip("Denominator of fraction (n/d)")]
+    [Range(1, 19)]
+    public int trapezohedronD = 2;
+
+    [Tooltip("Height of kite apex on OA (0 = use default)")]
+    [Range(0, 3.0f)]
+    public float trapezohedronHeightA = 0;
+
+    [Tooltip("Height of kite apex on OB (0 = use default)")]
+    [Range(0, 3.0f)]
+    public float trapezohedronHeightB = 0;
+
     [Header("Symmetrohedra Settings (Kaplan-Hart notation: -k sym,mult0,mult1,mult2)")]
     [Tooltip("Symmetry: T (tetrahedral), O (octahedral), I (icosahedral)")]
     public char symmetroSym = 'O';
@@ -379,6 +412,20 @@ public class PolyhedronExample : MonoBehaviour
             case PolyhedronType.Unitile2D:
                 return Geometry.CreateUnitile2D(tilingPattern, tilingSurface,
                     tilingWidth, tilingHeight, tilingMinorRadius, tilingMajorRadius);
+
+            case PolyhedronType.IsoKite:
+                return Geometry.CreateIsoKite(isoKiteModel,
+                    isoKiteHeightA, isoKiteHeightB, isoKiteHeightC);
+
+            case PolyhedronType.Trapezohedron:
+                // Validate fraction before creating
+                if (trapezohedronD >= trapezohedronN)
+                {
+                    Debug.LogError($"Invalid trapezohedron fraction {trapezohedronN}/{trapezohedronD}: d must be < n");
+                    trapezohedronD = trapezohedronN - 1;
+                }
+                return Geometry.CreateTrapezohedron(trapezohedronN, trapezohedronD,
+                    trapezohedronHeightA, trapezohedronHeightB);
 
             case PolyhedronType.Symmetrohedra:
                 // Validate symmetry type

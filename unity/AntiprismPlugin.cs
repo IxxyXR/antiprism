@@ -39,6 +39,8 @@ namespace Antiprism
         Cupola,             // N-sided cupola (n >= 2)
         Geodesic,           // Geodesic sphere (requires frequency and method)
         Unitile2D,          // 2D tiling on a surface (11 patterns x 4 surfaces)
+        IsoKite,            // Isohedral kite-faced polyhedra (Schwarz triangles T1-T2, O1-O2, I1-I10)
+        Trapezohedron,      // Kite-faced dipyramids (n/d fraction)
         Symmetrohedra,      // Symmetrohedra using Kaplan-Hart notation
         JohnsonSolid,       // Johnson solid by number (J1-J92)
         UniformPolyhedron,  // Uniform polyhedron by number (U1-U80) - includes all Archimedean & Kepler-Poinsot
@@ -99,6 +101,40 @@ namespace Antiprism
         Torus = 1,         // Donut/torus surface
         KleinBottle = 2,   // Klein bottle (non-orientable)
         MobiusStrip = 3    // Mobius strip (single-sided)
+    }
+
+    /// <summary>
+    /// Schwarz triangle models for iso_kite (kite-faced polyhedra)
+    /// </summary>
+    public enum SchwarzTriangle
+    {
+        // Tetrahedral models
+        T1,  // (3,3,2)
+        T2,  // (3,3,3/2)
+
+        // Octahedral models
+        O1,  // (4,3,2)
+        O2,  // (4/3,4,3)
+        O2B, // (4,3,4/3)
+
+        // Icosahedral models
+        I1,   // (5,3,2)
+        I2,   // (5/2,3,2)
+        I3,   // (5/2,5,2)
+        I4,   // (5/2,3,3)
+        I4B,  // (3,5/2,3)
+        I5,   // (5/4,3,3)
+        I5B,  // (3,5/4,3)
+        I6,   // (5/3,5,3)
+        I6B,  // (5,5/3,3)
+        I6C,  // (5,3,5/3)
+        I7,   // (5/4,5,3)
+        I7B,  // (5,5/4,3)
+        I8,   // (5/3,5/2,3)
+        I8B,  // (5/2,5/3,3)
+        I9,   // (5/4,5,5)
+        I9B,  // (5,5/4,5)
+        I10   // (5/2,5/2,5/2)
     }
 
     /// <summary>
@@ -186,6 +222,8 @@ namespace Antiprism
                 case PolyhedronType.Cupola:
                 case PolyhedronType.Geodesic:
                 case PolyhedronType.Unitile2D:
+                case PolyhedronType.IsoKite:
+                case PolyhedronType.Trapezohedron:
                 case PolyhedronType.Symmetrohedra:
                 case PolyhedronType.JohnsonSolid:
                 case PolyhedronType.UniformPolyhedron:
@@ -379,6 +417,62 @@ namespace Antiprism
                 width, height, minorRadius, majorRadius);
             if (status != Status.OK)
                 throw new Exception($"Failed to create tiling: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create an isohedral kite-faced polyhedron from a Schwarz triangle
+        /// </summary>
+        /// <param name="model">Schwarz triangle model (T1, T2, O1, O2, I1-I10, etc.)</param>
+        /// <param name="heightA">Height of kite apex on OA (0 = auto-calculate)</param>
+        /// <param name="heightB">Height of kite apex on OB (0 = auto-calculate)</param>
+        /// <param name="heightC">Height of kite side vertex on OC (0 = auto-calculate)</param>
+        /// <returns>New Geometry containing the kite-faced polyhedron</returns>
+        /// <remarks>
+        /// Creates isohedral kite-faced polyhedra based on Schwarz triangles.
+        /// Examples:
+        ///   - T1: Cube/Rhombic Dodecahedron family (tetrahedral symmetry)
+        ///   - O1: Rhombic Dodecahedron (octahedral symmetry)
+        ///   - I1: Rhombic Triacontahedron (icosahedral symmetry)
+        /// Heights are auto-calculated if set to 0.
+        /// </remarks>
+        public static Geometry CreateIsoKite(SchwarzTriangle model,
+            double heightA = 0, double heightB = 0, double heightC = 0)
+        {
+            Geometry geom = new Geometry();
+            string modelName = model.ToString();
+            Status status = anti_make_iso_kite(geom.handle, modelName, heightA, heightB, heightC);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create iso_kite {modelName}: {status}");
+
+            return geom;
+        }
+
+        /// <summary>
+        /// Create a trapezohedron (kite-faced dipyramid)
+        /// </summary>
+        /// <param name="n">Numerator of fraction (n >= 2)</param>
+        /// <param name="d">Denominator of fraction (0 < d < n)</param>
+        /// <param name="heightA">Height of kite apex on OA (0 = use default)</param>
+        /// <param name="heightB">Height of kite apex on OB (0 = use default)</param>
+        /// <returns>New Geometry containing the trapezohedron</returns>
+        /// <remarks>
+        /// Creates a trapezohedron based on fraction n/d.
+        /// Examples:
+        ///   - n=3, d=1: Triangular trapezohedron (cube)
+        ///   - n=4, d=1: Square trapezohedron
+        ///   - n=5, d=2: Pentagonal trapezohedron
+        /// </remarks>
+        public static Geometry CreateTrapezohedron(int n, int d, double heightA = 0, double heightB = 0)
+        {
+            if (n < 2 || d <= 0 || d >= n)
+                throw new ArgumentException($"Invalid fraction {n}/{d}: n must be >= 2 and 0 < d < n");
+
+            Geometry geom = new Geometry();
+            Status status = anti_make_trapezohedron(geom.handle, n, d, heightA, heightB);
+            if (status != Status.OK)
+                throw new Exception($"Failed to create trapezohedron {n}/{d}: {status}");
 
             return geom;
         }
@@ -1062,6 +1156,17 @@ namespace Antiprism
         private static extern Status anti_make_unitile2d(
             IntPtr geom, int pattern, int surface_type,
             double width, double height, double minor_radius, double major_radius);
+
+        // Kite-faced polyhedra generators
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_iso_kite(
+            IntPtr geom, string model_name,
+            double height_a, double height_b, double height_c);
+
+        [DllImport(AntiprismPlugin.LIBRARY_NAME)]
+        private static extern Status anti_make_trapezohedron(
+            IntPtr geom, int n, int d,
+            double height_a, double height_b);
 
         // Symmetrohedra generators
         [DllImport(AntiprismPlugin.LIBRARY_NAME)]
