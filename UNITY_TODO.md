@@ -1,5 +1,73 @@
 # Unity Plugin TODO List
 
+## CRITICAL - Core Integration Tasks
+
+### Integrate All Standalone Programs into Unity Plugin
+**Priority: HIGHEST** - Every standalone program that generates or transforms geometry should be accessible through the C API and Unity plugin.
+
+**Excluded:** Viewers (antiview), format converters (obj2off, off2obj, off2pov, off2vrml, off2dae, off2crds), and text output tools (rep_print).
+
+#### Phase 1: Critical Polyhedra Generators (NOT YET INTEGRATED)
+- [ ] **symmetro** - Symmetrohedra using Kaplan-Hart notation (T,O,I symmetries with l,m,n multipliers)
+- [ ] **stellate** - Stellation operations on polyhedra
+- [ ] **canonical** - Canonical/normalized forms (planarize, center, unitize)
+- [ ] **wythoff** - Wythoff construction (may overlap with uniform resources)
+- [ ] **waterman** - Waterman polyhedra from lattices
+- [ ] **poly_kscope** - Kaleidoscopic polyhedra
+- [ ] **unitile2d** - Uniform 2D tilings
+- [ ] **leonardo** - Leonardo-style polyhedra
+
+#### Phase 2: Important Transformations & Operations
+- [ ] **planar** - Make polyhedra planar (planarization algorithms)
+- [ ] **canonical** - Canonicalization operations
+- [ ] **repel** - Vertex repelling/optimization for better geometry
+- [ ] **off_align** - Alignment operations (align to axes, center, etc.)
+- [ ] **pol_recip** - Polar reciprocation (beyond basic dual - already have dual)
+- [ ] **to_nfold** - Transform to n-fold rotational symmetry
+- [ ] **bravais** - Bravais lattice polyhedra
+- [ ] **miller** - Miller polyhedra from lattices
+
+#### Phase 3: Utilities & Advanced Operations
+- [ ] **off_color** - Advanced coloring operations
+- [ ] **off_normals** - Normal vector operations
+- [ ] **poly_form** - Polygon formation operations
+- [ ] **sph_rings** - Spherical rings
+- [ ] **iso_delta** - Isohedral deltahedra
+- [ ] **iso_kite** - Isohedral kite polyhedra
+- [ ] **kcycle** - K-cycle operations
+- [ ] **n_icons** - N-icons construction
+- [ ] **tetra59** - Special tetrahedra constructions
+
+#### Phase 4: Query & Analysis (Lower Priority for Unity)
+- [ ] **off_query** - Query polyhedron properties
+- [ ] **off_report** - Generate reports on polyhedra
+- [ ] **off_util** - General utilities
+
+**Total standalone programs: 46** | **Currently integrated: ~8** | **Remaining: ~38**
+
+### Other Major Gaps - Base Library Features Not Yet Exposed
+
+#### Core Library Features Missing from C API
+- [ ] **Tiling operations** (tiling.h) - Wythoff-style tiling, uniform tilings
+- [ ] **Advanced coloring** (coloring.h, colormap.h) - Color by symmetry, map-based coloring
+- [ ] **Symmetry queries** (symmetry.h) - Full symmetry group detection and operations
+- [ ] **Planar operations** (planar.h) - Make faces planar, check planarity
+- [ ] **Geometric info queries** (geometryinfo.h) - Volume, surface area, angles, etc.
+- [ ] **Advanced transformations** (trans3d.h, trans4d.h) - 3D/4D transformation matrices
+- [ ] **Iteration utilities** (iteration.h) - Iterative refinement operations
+
+#### Missing Modifier Operations
+- [ ] **Chamfer** - Edge/vertex chamfering
+- [ ] **Whirl** - Face whirling
+- [ ] **Propeller** - Propeller operation
+- [ ] **Loft** - Face lofting
+- [ ] **Quinto** - Quinto operation
+- [ ] **Lace** - Lace operation
+- [ ] **Stake** - Stake operation
+- [ ] **Medial** - Medial operation
+
+**Note:** Many Conway operators are implemented, but there are additional specialized operations in Antiprism that aren't Conway notation.
+
 ## Current Status
 
 ### Completed in Previous Sessions
