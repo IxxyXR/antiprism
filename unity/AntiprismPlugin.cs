@@ -16,11 +16,14 @@ namespace Antiprism
 {
     /// <summary>
     /// Simplified polyhedron types - parameterized types use separate parameter fields
-    /// Covers 200+ polyhedra via ~28 enum entries through parameterization
+    /// Covers 200+ polyhedra via ~23 enum entries through parameterization
     /// </summary>
     /// <remarks>
-    /// All Archimedean (U2-U29) and Kepler-Poinsot (U34,U35,U52,U53) polyhedra
-    /// are accessed via UniformPolyhedron with their U-number
+    /// All uniform polyhedra (U1-U80) are accessed via UniformPolyhedron with their U-number.
+    /// This includes:
+    /// - Platonic solids: U1 (tet), U5 (oct), U6 (cube), U22 (ico), U23 (dod)
+    /// - Archimedean solids: U2-U14, U15-U21, U24-U29
+    /// - Kepler-Poinsot polyhedra: U34, U35, U52, U53
     /// </remarks>
     public enum PolyhedronType
     {
@@ -35,13 +38,6 @@ namespace Antiprism
         JohnsonSolid,       // Johnson solid by number (J1-J92)
         UniformPolyhedron,  // Uniform polyhedron by number (U1-U80) - includes all Archimedean & Kepler-Poinsot
         Wenninger,          // Wenninger stellation by number (W1-W119)
-
-        // === PLATONIC SOLIDS ===
-        Tetrahedron,
-        Cube,
-        Octahedron,
-        Dodecahedron,
-        Icosahedron,
 
         // === CATALAN SOLIDS (duals of Archimedean - not in uniform series) ===
         RhombicDodecahedron,
@@ -133,16 +129,9 @@ namespace Antiprism
         {
             switch (type)
             {
-                // Platonic Solids
-                case PolyhedronType.Tetrahedron: return "tet";
-                case PolyhedronType.Cube: return "cube";
-                case PolyhedronType.Octahedron: return "oct";
-                case PolyhedronType.Dodecahedron: return "dodec";
-                case PolyhedronType.Icosahedron: return "ico";
-
                 // Catalan Solids (duals of Archimedean - not in uniform series)
-                case PolyhedronType.RhombicDodecahedron: return "rhombic_d12";
-                case PolyhedronType.RhombicTriacontahedron: return "rhombic_t30";
+                case PolyhedronType.RhombicDodecahedron: return "rhombic_dodecahedron";
+                case PolyhedronType.RhombicTriacontahedron: return "rhombic_triacontahedron";
 
                 // Uniform Compounds
                 case PolyhedronType.StellaOctangula: return "UC1";
