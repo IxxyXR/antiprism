@@ -16,7 +16,7 @@ namespace Antiprism
 {
     /// <summary>
     /// Simplified polyhedron types - parameterized types use separate parameter fields
-    /// Covers 200+ polyhedra via ~23 enum entries through parameterization
+    /// Covers 200+ polyhedra via ~21 enum entries through parameterization
     /// </summary>
     /// <remarks>
     /// All uniform polyhedra (U1-U80) are accessed via UniformPolyhedron with their U-number.
@@ -24,6 +24,10 @@ namespace Antiprism
     /// - Platonic solids: U1 (tet), U5 (oct), U6 (cube), U22 (ico), U23 (dod)
     /// - Archimedean solids: U2-U14, U15-U21, U24-U29
     /// - Kepler-Poinsot polyhedra: U34, U35, U52, U53
+    ///
+    /// Specific prisms should use the Prism parameterized type:
+    /// - Tetrahedral prism: Prism with sides=4
+    /// - Octahedral prism: Prism with sides=8
     /// </remarks>
     public enum PolyhedronType
     {
@@ -55,8 +59,6 @@ namespace Antiprism
         RhombicHexecontahedron,
         Csaszar,
         Szilassi,
-        TetrahedralPrism,
-        OctahedralPrism,
     }
 
     /// <summary>
@@ -145,8 +147,6 @@ namespace Antiprism
                 case PolyhedronType.RhombicHexecontahedron: return "rhombic_h60";
                 case PolyhedronType.Csaszar: return "csaszar";
                 case PolyhedronType.Szilassi: return "szilassi";
-                case PolyhedronType.TetrahedralPrism: return "tet_prism";
-                case PolyhedronType.OctahedralPrism: return "oct_prism";
 
                 // Parameterized types - these should use Create methods or be handled in CreateBasePolyhedron
                 case PolyhedronType.Prism:
