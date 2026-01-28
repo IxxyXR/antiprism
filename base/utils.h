@@ -197,8 +197,9 @@ void clear_extra_whitespace(std::string &str);
 
 /// Open a support file
 /** Tries to open a file by its name, then tries to open it in
- *  \c $ANTIPRISM_DATA/sub_dir, finally tries to open it in
- *  \c sub_dir in the installation data directory.
+ *  \c $ANTIPRISM_DATA/sub_dir, then tries to open it in a \c data
+ *  directory next to the executable (or one level up), finally
+ *  tries to open it in \c sub_dir in the installation data directory.
  * \param fname the name of the file to open.
  * \param subdir the data directory subdirectory to search in.
  * \param alt_name a name that is found in an alt_names.txt file before
@@ -206,7 +207,8 @@ void clear_extra_whitespace(std::string &str);
  * \param where used to return the place that the file was found <ul>
  *  <li>\c 0 - locally
  *  <li>\c 1 - in the ANTIPRISM_DATA directory
- *  <li>\c 2 - in the installation data directory
+ *  <li>\c 2 - in a data directory near the executable
+ *  <li>\c 3 - in the installation data directory
  *  </ul>
  * \param fpath used to return the full path to the file that was found.
  * \return A pointer to the opened file stream. */

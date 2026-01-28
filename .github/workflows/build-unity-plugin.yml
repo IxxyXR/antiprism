@@ -267,14 +267,20 @@ jobs:
       if: matrix.name != 'windows'
       run: |
         mkdir -p dist
-        find src -maxdepth 1 -type f -perm -111 -print0 | tar -czf dist/antiprism-cli-${{ matrix.name }}.tar.gz --null -T -
+        ( find src -maxdepth 1 -type f -perm -111 -print0 \
+          ; find aview -maxdepth 1 -type f -perm -111 -print0 2>/dev/null || true \
+          ; find data -type f -print0 2>/dev/null || true ) \
+        | tar -czf dist/antiprism-cli-${{ matrix.name }}.tar.gz --null -T -
 
     - name: Package CLI artifacts (Windows/MSYS2)
       if: matrix.name == 'windows'
       shell: msys2 {0}
       run: |
         mkdir -p dist
-        find src -maxdepth 1 -type f -name "*.exe" -print0 | tar -czf dist/antiprism-cli-windows.tar.gz --null -T -
+        ( find src -maxdepth 1 -type f -name "*.exe" -print0 \
+          ; find aview -maxdepth 1 -type f -name "*.exe" -print0 2>/dev/null || true \
+          ; find data -type f -print0 2>/dev/null || true ) \
+        | tar -czf dist/antiprism-cli-windows.tar.gz --null -T -
 
     - name: Upload CLI artifacts
       uses: actions/upload-artifact@v4

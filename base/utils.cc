@@ -42,11 +42,21 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits.h>
 #include <map>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <vector>
+
+#if defined(_WIN32)
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <unistd.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#endif
 
 using std::map;
 using std::string;
@@ -490,6 +500,42 @@ FILE *open_file_data(const string &dir, string f_name, string *aname = nullptr)
   return nullptr;
 }
 
+static string get_exe_dir()
+{
+#if defined(_WIN32)
+  char path[MAX_PATH] = {0};
+  DWORD len = GetModuleFileNameA(nullptr, path, MAX_PATH);
+  if (len == 0 || len == MAX_PATH)
+    return "";
+  string p(path, len);
+#elif defined(__APPLE__)
+  uint32_t size = 0;
+  if (_NSGetExecutablePath(nullptr, &size) != 0 || size == 0)
+    return "";
+  vector<char> buf(size + 1, '\0');
+  if (_NSGetExecutablePath(buf.data(), &size) != 0)
+    return "";
+  char realbuf[PATH_MAX];
+  if (realpath(buf.data(), realbuf))
+    return string(realbuf);
+  string p(buf.data());
+#elif defined(__linux__)
+  char path[PATH_MAX] = {0};
+  ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
+  if (len <= 0)
+    return "";
+  path[len] = '\0';
+  string p(path, static_cast<size_t>(len));
+#else
+  return "";
+#endif
+
+  size_t pos = p.find_last_of("/\\");
+  if (pos == string::npos)
+    return "";
+  return p.substr(0, pos);
+}
+
 FILE *open_sup_file(const char *fname, const char *subdir, string *alt_name,
                     int *where, string *fpath)
 {
@@ -530,8 +576,25 @@ FILE *open_sup_file(const char *fname, const char *subdir, string *alt_name,
       return nullptr;
   }
 
+  // try data directory relative to the executable
+  string exe_dir = get_exe_dir();
+  if (!exe_dir.empty()) {
+    *where = 2; // exe-relative data
+    string fdir = exe_dir + "/data" + subdir;
+    if ((file = open_file_data(fdir, *fpath, alt_name)))
+      return file;
+    if (*alt_name != "")
+      return nullptr;
+
+    string fdir_up = exe_dir + "/../data" + subdir;
+    if ((file = open_file_data(fdir_up, *fpath, alt_name)))
+      return file;
+    if (*alt_name != "")
+      return nullptr;
+  }
+
   // try hardcoded install path for data directory
-  *where = 2; // installed
+  *where = 3; // installed
   string fdir = string(SUPDIR) + subdir;
   if ((file = open_file_data(fdir, *fpath, alt_name)))
     return file;
