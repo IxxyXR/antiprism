@@ -20,96 +20,11 @@ The Antiprism Unity plugin provides:
 
 ## Building the Library
 
-### Desktop Platforms (Linux, macOS, Windows)
+Build instructions (desktop + mobile) are maintained in the main guide:
 
-1. **Configure the build:**
-   ```bash
-   cd /path/to/antiprism
-   ./configure
-   ```
+- `BUILD_UNITY_PLUGIN.md`
 
-2. **Build the library:**
-   ```bash
-   make
-   ```
-
-3. **Install (optional):**
-   ```bash
-   sudo make install
-   ```
-
-4. **The library will be:**
-   - Linux: `base/.libs/libantiprism.so`
-   - macOS: `base/.libs/libantiprism.dylib`
-   - Windows: `base/.libs/libantiprism.dll` (or `antiprism.dll`)
-
-### Android
-
-For Android builds, you need to cross-compile for each architecture:
-
-1. **Install Android NDK** (if not already installed)
-
-2. **Set up NDK environment:**
-   ```bash
-   export ANDROID_NDK=/path/to/android-ndk
-   export TOOLCHAIN=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64
-   ```
-
-3. **Build for each architecture:**
-
-   **ARMv7:**
-   ```bash
-   ./configure --host=armv7a-linux-androideabi21 \
-       CC=$TOOLCHAIN/bin/armv7a-linux-androideabi21-clang \
-       CXX=$TOOLCHAIN/bin/armv7a-linux-androideabi21-clang++ \
-       --disable-shared --enable-static
-   make clean && make
-   cp base/.libs/libantiprism.a build/android/armeabi-v7a/
-   ```
-
-   **ARM64:**
-   ```bash
-   ./configure --host=aarch64-linux-android21 \
-       CC=$TOOLCHAIN/bin/aarch64-linux-android21-clang \
-       CXX=$TOOLCHAIN/bin/aarch64-linux-android21-clang++ \
-       --disable-shared --enable-static
-   make clean && make
-   cp base/.libs/libantiprism.a build/android/arm64-v8a/
-   ```
-
-   **x86:**
-   ```bash
-   ./configure --host=i686-linux-android21 \
-       CC=$TOOLCHAIN/bin/i686-linux-android21-clang \
-       CXX=$TOOLCHAIN/bin/i686-linux-android21-clang++ \
-       --disable-shared --enable-static
-   make clean && make
-   cp base/.libs/libantiprism.a build/android/x86/
-   ```
-
-   **x86_64:**
-   ```bash
-   ./configure --host=x86_64-linux-android21 \
-       CC=$TOOLCHAIN/bin/x86_64-linux-android21-clang \
-       CXX=$TOOLCHAIN/bin/x86_64-linux-android21-clang++ \
-       --disable-shared --enable-static
-   make clean && make
-   cp base/.libs/libantiprism.a build/android/x86_64/
-   ```
-
-### iOS
-
-For iOS, use Xcode and the iOS toolchain:
-
-```bash
-./configure --host=arm-apple-darwin \
-    CC=$(xcrun --sdk iphoneos --find clang) \
-    CXX=$(xcrun --sdk iphoneos --find clang++) \
-    CFLAGS="-arch arm64 -mios-version-min=11.0" \
-    CXXFLAGS="-arch arm64 -mios-version-min=11.0" \
-    --disable-shared --enable-static
-make clean && make
-```
+That guide includes macOS-specific setup notes, CMake (recommended), and Android/iOS details.
 
 ## Unity Integration
 

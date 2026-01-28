@@ -27,6 +27,15 @@ sudo apt-get install build-essential automake autoconf libtool
 xcode-select --install
 brew install automake autoconf libtool
 ```
+Notes:
+- If you have full Xcode installed, you can switch to it for a more complete SDK:
+  ```bash
+  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+  ```
+- Accept the Xcode license (required after switching or installing updates):
+  ```bash
+  sudo xcodebuild -license
+  ```
 
 ### Windows
 - Visual Studio 2015 or later with C++ tools
@@ -64,7 +73,11 @@ Choose the method that works best for your workflow.
 
 2. **Build:**
    ```bash
+   # Linux
    make -j$(nproc)
+
+   # macOS
+   make -j$(sysctl -n hw.ncpu)
    ```
 
 3. **Find the library:**
