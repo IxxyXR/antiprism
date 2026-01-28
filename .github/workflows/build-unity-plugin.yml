@@ -263,24 +263,29 @@ jobs:
         ./configure --with-x=no --disable-shared --enable-static
         make -j$(nproc)
 
-    - name: Package CLI artifacts (Linux/macOS)
-      if: matrix.name != 'windows'
+    - name: Package CLI artifacts (Linux)
+      if: matrix.name == 'linux'
       run: |
         mkdir -p dist
         files_list=$(mktemp)
-        # Prefer real libtool binaries from .libs, fall back to top-level wrappers
         for d in src aview; do
           if [ -d "$d/.libs" ]; then
             find "$d/.libs" -maxdepth 1 -type f -perm -111 -print0 >> "$files_list"
           fi
           find "$d" -maxdepth 1 -type f -perm -111 -print0 >> "$files_list"
         done
-        # Add data files for resources
         if [ -d data ]; then
           find data -type f -print0 >> "$files_list"
         fi
-        tr -d '\n' < "$files_list" | tar -czf dist/antiprism-cli-${{ matrix.name }}.tar.gz --null -T -
+        tr -d '\n' < "$files_list" | tar -czf dist/antiprism-cli-linux.tar.gz --null -T -
         rm -f "$files_list"
+
+    - name: Package CLI artifacts (macOS)
+      if: matrix.name == 'macos'
+      run: |
+        mkdir -p dist
+        scripts/packaging/macos-cli-package.sh dist/antiprism-cli-macos
+        tar -czf dist/antiprism-cli-macos.tar.gz -C dist antiprism-cli-macos
 
     - name: Package CLI artifacts (Windows/MSYS2)
       if: matrix.name == 'windows'
