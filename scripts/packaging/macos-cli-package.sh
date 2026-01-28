@@ -29,6 +29,19 @@ if [ -d data ]; then
   rsync -a data "$out_dir/"
 fi
 
+# Add README and a double-clickable unquarantine helper
+if [ -f CLI_README.md ]; then
+  cp -f CLI_README.md "$out_dir/"
+fi
+cat > "$out_dir/unquarantine.command" <<'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+pkg_dir="$(cd "$(dirname "$0")" && pwd)"
+xattr -dr com.apple.quarantine "$pkg_dir"
+echo "Removed quarantine from: $pkg_dir"
+SCRIPT
+chmod +x "$out_dir/unquarantine.command"
+
 # Relink binaries to the bundled dylib
 if [ -f "$out_dir/lib/libantiprism.0.dylib" ]; then
   install_name_tool -id "@rpath/libantiprism.0.dylib" "$out_dir/lib/libantiprism.0.dylib"
