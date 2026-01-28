@@ -207,6 +207,81 @@ jobs:
           build/ios-device/Release/libantiprism.a
           build/ios-simulator/Release/libantiprism.a
 
+  build-cli:
+    name: Build CLI (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - name: linux
+            os: ubuntu-latest
+          - name: macos
+            os: macos-latest
+          - name: windows
+            os: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install deps (Linux)
+      if: matrix.name == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf automake libtool make g++ pkg-config
+
+    - name: Install deps (macOS)
+      if: matrix.name == 'macos'
+      run: |
+        brew update
+        brew install automake libtool
+
+    - name: Install deps (Windows/MSYS2)
+      if: matrix.name == 'windows'
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          mingw-w64-x86_64-toolchain
+          autoconf
+          automake
+          libtool
+
+    - name: Build CLI (Linux/macOS)
+      if: matrix.name != 'windows'
+      run: |
+        ./bootstrap
+        ./configure --with-x=no
+        make -j$( (command -v nproc >/dev/null && nproc) || sysctl -n hw.ncpu )
+
+    - name: Build CLI (Windows/MSYS2)
+      if: matrix.name == 'windows'
+      shell: msys2 {0}
+      run: |
+        ./bootstrap
+        ./configure --with-x=no
+        make -j$(nproc)
+
+    - name: Package CLI artifacts (Linux/macOS)
+      if: matrix.name != 'windows'
+      run: |
+        mkdir -p dist
+        find src -maxdepth 1 -type f -perm -111 -print0 | tar -czf dist/antiprism-cli-${{ matrix.name }}.tar.gz --null -T -
+
+    - name: Package CLI artifacts (Windows/MSYS2)
+      if: matrix.name == 'windows'
+      shell: msys2 {0}
+      run: |
+        mkdir -p dist
+        find src -maxdepth 1 -type f -name "*.exe" -print0 | tar -czf dist/antiprism-cli-windows.tar.gz --null -T -
+
+    - name: Upload CLI artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cli-${{ matrix.name }}
+        path: dist/*.tar.gz
+
   package-unity-plugin:
     name: Package Unity Plugin
     needs: [build-desktop, build-linux, build-android, build-ios]
