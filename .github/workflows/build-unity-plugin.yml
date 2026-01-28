@@ -66,6 +66,13 @@ jobs:
         name: windows-${{ matrix.arch }}
         path: build/Release/antiprism.dll
 
+    - name: Upload artifacts (macOS)
+      if: matrix.name == 'macos'
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-${{ matrix.arch }}
+        path: build/libantiprism.dylib
+
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
