@@ -260,27 +260,45 @@ jobs:
       shell: msys2 {0}
       run: |
         ./bootstrap
-        ./configure --with-x=no
+        ./configure --with-x=no --disable-shared --enable-static
         make -j$(nproc)
 
     - name: Package CLI artifacts (Linux/macOS)
       if: matrix.name != 'windows'
       run: |
         mkdir -p dist
-        ( find src -maxdepth 1 -type f -perm -111 -print0 \
-          ; find aview -maxdepth 1 -type f -perm -111 -print0 2>/dev/null || true \
-          ; find data -type f -print0 2>/dev/null || true ) \
-        | tar -czf dist/antiprism-cli-${{ matrix.name }}.tar.gz --null -T -
+        files_list=$(mktemp)
+        # Prefer real libtool binaries from .libs, fall back to top-level wrappers
+        for d in src aview; do
+          if [ -d "$d/.libs" ]; then
+            find "$d/.libs" -maxdepth 1 -type f -perm -111 -print0 >> "$files_list"
+          fi
+          find "$d" -maxdepth 1 -type f -perm -111 -print0 >> "$files_list"
+        done
+        # Add data files for resources
+        if [ -d data ]; then
+          find data -type f -print0 >> "$files_list"
+        fi
+        tr -d '\n' < "$files_list" | tar -czf dist/antiprism-cli-${{ matrix.name }}.tar.gz --null -T -
+        rm -f "$files_list"
 
     - name: Package CLI artifacts (Windows/MSYS2)
       if: matrix.name == 'windows'
       shell: msys2 {0}
       run: |
         mkdir -p dist
-        ( find src -maxdepth 1 -type f -name "*.exe" -print0 \
-          ; find aview -maxdepth 1 -type f -name "*.exe" -print0 2>/dev/null || true \
-          ; find data -type f -print0 2>/dev/null || true ) \
-        | tar -czf dist/antiprism-cli-windows.tar.gz --null -T -
+        files_list=$(mktemp)
+        for d in src aview; do
+          if [ -d "$d/.libs" ]; then
+            find "$d/.libs" -maxdepth 1 -type f -name "*.exe" -print0 >> "$files_list"
+          fi
+          find "$d" -maxdepth 1 -type f -name "*.exe" -print0 >> "$files_list"
+        done
+        if [ -d data ]; then
+          find data -type f -print0 >> "$files_list"
+        fi
+        tr -d '\n' < "$files_list" | tar -czf dist/antiprism-cli-windows.tar.gz --null -T -
+        rm -f "$files_list"
 
     - name: Upload CLI artifacts
       uses: actions/upload-artifact@v4
