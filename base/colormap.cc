@@ -31,6 +31,7 @@
 #include "private_named_cols.h"
 #include "random.h"
 #include "utils.h"
+#include "platform_compat.h"
 
 #include <algorithm>
 #include <cctype>

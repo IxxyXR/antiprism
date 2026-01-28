@@ -77,7 +77,7 @@ int ProperColor::find_colors()
   Order.resize(num_node, 0);
   BestColoring = num_node + 1;
 
-  int valid[num_node], clique[num_node];
+  std::vector<int> valid(num_node), clique(num_node);
   for (int i = 0; i < num_node; i++)
     valid[i] = true;
 
@@ -85,7 +85,7 @@ int ProperColor::find_colors()
   num_prob = 0;
   max_prob = 10000;
 
-  lb = max_w_clique(valid, clique, 0, num_node);
+  lb = max_w_clique(valid.data(), clique.data(), 0, num_node);
 
   int place = 0;
 
@@ -275,7 +275,7 @@ int ProperColor::max_w_clique(int *valid, int *clique, int lower, int target)
     if (clique[j])
       continue;
 
-    int valid1[num_node];
+    std::vector<int> valid1(num_node);
     for (int place1 = 0; place1 < num_node; place1++)
       valid1[place1] = false;
     for (int place1 = 0; place1 < place; place1++) {
@@ -285,8 +285,8 @@ int ProperColor::max_w_clique(int *valid, int *clique, int lower, int target)
       else
         valid1[k] = false;
     }
-    int clique1[num_node];
-    int new_weight = max_w_clique(valid1, clique1, incumb - 1, target - 1);
+    std::vector<int> clique1(num_node);
+    int new_weight = max_w_clique(valid1.data(), clique1.data(), incumb - 1, target - 1);
     if (new_weight + 1 > incumb) {
       /*      printf("Taking new\n");*/
       incumb = new_weight + 1;

@@ -55,6 +55,7 @@ dnl Add windows libraries for GLUT even if not needed
 AC_MSG_CHECKING([Add windows libraries for GLUT even if not needed])
 if test x"$WIN_BUILD" = x"yes" ; then
     GLUT_EXTRA_LIBS="-lwinmm -lgdi32"; AC_MSG_RESULT([yes])
+    CPPFLAGS="$CPPFLAGS -DANTIPRISM_BUILD_DLL"
 else
     GLUT_EXTRA_LIBS=""; AC_MSG_RESULT([no])
 fi

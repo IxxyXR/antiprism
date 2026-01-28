@@ -1,0 +1,415 @@
+name: Build Unity Plugin
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ "**" ]
+  workflow_dispatch:
+
+jobs:
+  build-desktop:
+    name: Build Desktop (${{ matrix.name }} ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - name: windows
+            os: windows-latest
+            arch: x64
+          - name: windows
+            os: windows-latest
+            arch: Win32
+          - name: macos
+            os: macos-latest
+            arch: x86_64
+          - name: macos
+            os: macos-latest
+            arch: arm64
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSVC
+      if: matrix.name == 'windows'
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Configure CMake (Windows)
+      if: matrix.name == 'windows'
+      run: >
+        cmake -S . -B build
+        -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
+        -DCMAKE_BUILD_TYPE=Release
+        -DBUILD_SHARED_LIBS=ON
+        -DBUILD_UNITY_PLUGIN=ON
+        -DBUILD_EXECUTABLES=OFF
+
+    - name: Configure CMake (macOS)
+      if: matrix.name == 'macos'
+      run: >
+        cmake -S . -B build
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
+        -DBUILD_SHARED_LIBS=ON
+        -DBUILD_UNITY_PLUGIN=ON
+        -DBUILD_EXECUTABLES=OFF
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Upload artifacts (Windows)
+      if: matrix.name == 'windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-${{ matrix.arch }}
+        path: build/Release/antiprism.dll
+
+    - name: Upload artifacts (macOS)
+      if: matrix.name == 'macos'
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-${{ matrix.arch }}
+        path: build/libantiprism.dylib
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_UNITY_PLUGIN=ON \
+          -DBUILD_EXECUTABLES=OFF
+
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-x86_64
+        path: build/libantiprism.so
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Android NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r25c
+        add-to-path: false
+
+    - name: Configure CMake
+      env:
+        ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+      run: |
+        mkdir -p build/android-${{ matrix.abi }}
+        cd build/android-${{ matrix.abi }}
+        cmake ../.. \
+          -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
+          -DANDROID_ABI=${{ matrix.abi }} \
+          -DANDROID_PLATFORM=android-21 \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_UNITY_PLUGIN=ON \
+          -DBUILD_EXECUTABLES=OFF
+
+    - name: Build
+      run: |
+        cd build/android-${{ matrix.abi }}
+        make -j$(nproc)
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-${{ matrix.abi }}
+        path: build/android-${{ matrix.abi }}/libantiprism.so
+
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        platform: [OS64, SIMULATORARM64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure CMake (Device)
+      if: matrix.platform == 'OS64'
+      run: |
+        mkdir -p build/ios-device
+        cd build/ios-device
+        cmake ../.. \
+          -G Xcode \
+          -DCMAKE_SYSTEM_NAME=iOS \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+          -DCMAKE_OSX_ARCHITECTURES=arm64 \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_UNITY_PLUGIN=ON \
+          -DBUILD_EXECUTABLES=OFF
+
+    - name: Configure CMake (Simulator)
+      if: matrix.platform == 'SIMULATORARM64'
+      run: |
+        mkdir -p build/ios-simulator
+        cd build/ios-simulator
+        cmake ../.. \
+          -G Xcode \
+          -DCMAKE_SYSTEM_NAME=iOS \
+          -DCMAKE_OSX_SYSROOT=iphonesimulator \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+          -DCMAKE_OSX_ARCHITECTURES=arm64 \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_UNITY_PLUGIN=ON \
+          -DBUILD_EXECUTABLES=OFF
+
+    - name: Build
+      run: |
+        if [ "${{ matrix.platform }}" == "OS64" ]; then
+          cd build/ios-device
+        else
+          cd build/ios-simulator
+        fi
+        cmake --build . --config Release
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-${{ matrix.platform }}
+        path: |
+          build/ios-device/Release/libantiprism.a
+          build/ios-simulator/Release/libantiprism.a
+
+  build-cli:
+    name: Build CLI (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - name: linux
+            os: ubuntu-latest
+          - name: macos
+            os: macos-latest
+          - name: windows
+            os: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install deps (Linux)
+      if: matrix.name == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf automake libtool make g++ pkg-config
+
+    - name: Install deps (macOS)
+      if: matrix.name == 'macos'
+      run: |
+        brew update
+        brew install automake libtool
+
+    - name: Install deps (Windows/MSYS2)
+      if: matrix.name == 'windows'
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          mingw-w64-x86_64-toolchain
+          autoconf
+          automake
+          libtool
+
+    - name: Build CLI (Linux/macOS)
+      if: matrix.name != 'windows'
+      run: |
+        ./bootstrap
+        ./configure --with-x=no
+        make -j$( (command -v nproc >/dev/null && nproc) || sysctl -n hw.ncpu )
+
+    - name: Build CLI (Windows/MSYS2)
+      if: matrix.name == 'windows'
+      shell: msys2 {0}
+      run: |
+        ./bootstrap
+        ./configure --with-x=no --disable-shared --enable-static
+        make -j$(nproc)
+
+    - name: Package CLI artifacts (Linux)
+      if: matrix.name == 'linux'
+      run: |
+        mkdir -p dist
+        files_list=$(mktemp)
+        for d in src aview; do
+          if [ -d "$d/.libs" ]; then
+            find "$d/.libs" -maxdepth 1 -type f -perm -111 -print0 >> "$files_list"
+          fi
+          find "$d" -maxdepth 1 -type f -perm -111 -print0 >> "$files_list"
+        done
+        if [ -d data ]; then
+          find data -type f -print0 >> "$files_list"
+        fi
+        tr -d '\n' < "$files_list" | tar -czf dist/antiprism-cli-linux.tar.gz --null -T -
+        rm -f "$files_list"
+
+    - name: Package CLI artifacts (macOS)
+      if: matrix.name == 'macos'
+      run: |
+        mkdir -p dist
+        scripts/packaging/macos-cli-package.sh dist/antiprism-cli-macos
+        tar -czf dist/antiprism-cli-macos.tar.gz -C dist antiprism-cli-macos
+
+    - name: Package CLI artifacts (Windows/MSYS2)
+      if: matrix.name == 'windows'
+      shell: msys2 {0}
+      run: |
+        mkdir -p dist
+        files_list=$(mktemp)
+        for d in src aview; do
+          if [ -d "$d/.libs" ]; then
+            find "$d/.libs" -maxdepth 1 -type f -name "*.exe" -print0 >> "$files_list"
+          fi
+          find "$d" -maxdepth 1 -type f -name "*.exe" -print0 >> "$files_list"
+        done
+        if [ -d data ]; then
+          find data -type f -print0 >> "$files_list"
+        fi
+        tr -d '\n' < "$files_list" | tar -czf dist/antiprism-cli-windows.tar.gz --null -T -
+        rm -f "$files_list"
+
+    - name: Upload CLI artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cli-${{ matrix.name }}
+        path: dist/*.tar.gz
+
+  package-unity-plugin:
+    name: Package Unity Plugin
+    needs: [build-desktop, build-linux, build-android, build-ios]
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Create Unity Plugin Package
+      run: |
+        mkdir -p unity-plugin/Plugins
+
+        # Windows
+        mkdir -p unity-plugin/Plugins/x86
+        mkdir -p unity-plugin/Plugins/x86_64
+        cp artifacts/windows-Win32/antiprism.dll unity-plugin/Plugins/x86/ || true
+        cp artifacts/windows-x64/antiprism.dll unity-plugin/Plugins/x86_64/ || true
+
+        # Linux
+        mkdir -p unity-plugin/Plugins/x86_64
+        cp artifacts/linux-x86_64/libantiprism.so unity-plugin/Plugins/x86_64/ || true
+
+        # macOS - Create universal binary
+        mkdir -p unity-plugin/Plugins/macOS
+        if [ -f artifacts/macos-x86_64/libantiprism.dylib ] && [ -f artifacts/macos-arm64/libantiprism.dylib ]; then
+          lipo -create \
+            artifacts/macos-x86_64/libantiprism.dylib \
+            artifacts/macos-arm64/libantiprism.dylib \
+            -output unity-plugin/Plugins/macOS/libantiprism.bundle
+        fi
+
+        # Android
+        mkdir -p unity-plugin/Plugins/Android/libs/armeabi-v7a
+        mkdir -p unity-plugin/Plugins/Android/libs/arm64-v8a
+        mkdir -p unity-plugin/Plugins/Android/libs/x86
+        mkdir -p unity-plugin/Plugins/Android/libs/x86_64
+        cp artifacts/android-armeabi-v7a/libantiprism.so unity-plugin/Plugins/Android/libs/armeabi-v7a/ || true
+        cp artifacts/android-arm64-v8a/libantiprism.so unity-plugin/Plugins/Android/libs/arm64-v8a/ || true
+        cp artifacts/android-x86/libantiprism.so unity-plugin/Plugins/Android/libs/x86/ || true
+        cp artifacts/android-x86_64/libantiprism.so unity-plugin/Plugins/Android/libs/x86_64/ || true
+
+        # iOS - Create XCFramework
+        mkdir -p unity-plugin/Plugins/iOS
+        cp artifacts/ios-OS64/libantiprism.a unity-plugin/Plugins/iOS/ || true
+
+        # Copy C# scripts
+        mkdir -p unity-plugin/Scripts
+        cp unity/*.cs unity-plugin/Scripts/ || true
+
+        # Copy documentation
+        cp BUILD_UNITY_PLUGIN.md unity-plugin/ || true
+        cp unity/README_UNITY.md unity-plugin/ || true
+
+        # Create archive
+        cd unity-plugin
+        tar -czf ../antiprism-unity-plugin.tar.gz .
+        cd ..
+        zip -r antiprism-unity-plugin.zip unity-plugin/
+
+    - name: Upload Unity Plugin Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: antiprism-unity-plugin
+        path: |
+          antiprism-unity-plugin.tar.gz
+          antiprism-unity-plugin.zip
+
+    - name: Delete intermediate artifacts
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const run_id = context.runId;
+          const patterns = [/^windows-/, /^linux-/, /^macos-/, /^android-/, /^ios-/];
+          const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+            owner,
+            repo,
+            run_id,
+            per_page: 100,
+          });
+          for (const art of data.artifacts) {
+            if (patterns.some((re) => re.test(art.name))) {
+              await github.rest.actions.deleteArtifact({ owner, repo, artifact_id: art.id });
+            }
+          }
+
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          antiprism-unity-plugin.tar.gz
+          antiprism-unity-plugin.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

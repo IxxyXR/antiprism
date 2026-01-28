@@ -1,0 +1,58 @@
+name: Update Homebrew Tap
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  update-homebrew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Compute tarball URL + SHA256
+        id: tarball
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          url="https://github.com/IxxyXR/antiprism/archive/refs/tags/${tag}.tar.gz"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          curl -L -o /tmp/antiprism.tar.gz "$url"
+          sha=$(shasum -a 256 /tmp/antiprism.tar.gz | awk '{print $1}')
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Update tap formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
+            echo "HOMEBREW_TAP_TOKEN is not set" >&2
+            exit 1
+          fi
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/IxxyXR/homebrew-antiprism.git" /tmp/homebrew-antiprism
+          cd /tmp/homebrew-antiprism
+
+          formula="Formula/antiprism.rb"
+          url="${{ steps.tarball.outputs.url }}"
+          sha="${{ steps.tarball.outputs.sha }}"
+          tag="${{ steps.tarball.outputs.tag }}"
+
+          # Update url, sha256, and version lines.
+          sed -i.bak -E "s|^  url \".*\"|  url \"${url}\"|" "$formula"
+          sed -i.bak -E "s|^  sha256 \".*\"|  sha256 \"${sha}\"|" "$formula"
+          sed -i.bak -E "s|^  version \".*\"|  version \"${tag}\"|" "$formula"
+          rm -f "$formula.bak"
+
+          git add "$formula"
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git config user.name "antiprism-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Update formula for ${tag}"
+          git push origin main

@@ -23,9 +23,13 @@
 */
 
 #include "geometryinfo.h"
+#include "platform_compat.h"
 #include "programopts.h"
+#include "platform_compat.h"
 #include "tiling.h"
+#include "platform_compat.h"
 #include "utils.h"
+#include "platform_compat.h"
 
 #include <cstring>
 #include <map>
