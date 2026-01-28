@@ -2,9 +2,9 @@ name: Build Unity Plugin
 
 on:
   push:
-    branches: [ main, master, develop, claude/** ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ "**" ]
   workflow_dispatch:
 
 jobs:
